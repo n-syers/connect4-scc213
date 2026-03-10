@@ -1,0 +1,75 @@
+@import url('variables.css');
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-family: Arial, sans-serif;
+    background-color: var(--clr-surface-a0);
+    min-width: 375px;
+}
+
+p {
+    font-size: 16px;
+    color: var(--clr-light-a0);
+    overflow-wrap: break-word;
+    margin: 0;
+}
+
+h1 {
+    font-size: 40px;
+    color: var(--clr-primary-a0);
+    margin-bottom: 1rem;
+}
+
+h2 {
+    font-size: 30px;
+    color: var(--clr-primary-a20);
+    margin-bottom: 0;
+}
+
+button {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5%;
+    padding: 0.5rem 1.5rem;
+    width: max-content;
+    margin: 0;
+}
+
+nav {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-top: 0;
+}
+
+thead {
+    font-size: 16px;
+    color: var(--clr-primary-a20);
+    border-bottom: 2px solid var(--clr-primary-a0);
+}
+
+tbody {
+    font-size: 12px;
+}
+
+.container {
+    background-color: var(--clr-surface-a10);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    padding-top: 0;
+    margin: 1rem;
+    border-radius: 15px;
+    width: fit-content;
+    min-width: 350px;
+    max-width: 100%;
+    min-height: 650px;
+    max-height: 100%;
+    z-index: 1;
+}

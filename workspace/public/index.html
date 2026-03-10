@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCC 213 Coursework - Connect4</title>
+    <link rel="stylesheet" href="./styles/variables.css">
+    <link rel="stylesheet" href="./styles/base.css">
+    <link rel="stylesheet" href="./styles/index.css">
+    <link rel="stylesheet" href="./styles/logger.css">
+    <script type='module' src="./scripts/utils/logger.js"></script>
+    <script type='module' src="./scripts/index.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+
+<body>
+    <div class="logger-main-container">
+        <div class="logger-container">
+            <span class="material-symbols-outlined" id="logger-icon">error</span>
+            <div id="logger-information">
+                <h1 id="log-title">Invalid Move</h1>
+                <p id="log-message">It is not your turn.</p>
+            </div>
+        </div>
+        <span class="material-symbols-outlined" id="logger-close">close</span>
+    </div>
+    <div class="container">
+        <h1>Connect 4</h1>
+        <p>Connect 4 is a game where two players take turns placing a disc into one of seven columns. The goal of
+            the game is to connect four discs in a horizontal, vertical, or diagonal line. The first player to get
+            four in a row wins the game.</p>
+        <div class="create-game-container">
+            <h2>Start New Game</h2>
+            <nav>
+                <div class="new-game-selector">
+                    <button class="primary-button" id="start-game">Select Gamemode</button>
+                    <div class="gamemodes">
+                        <a id="start_lpvp_a">
+                            <span class="material-symbols-outlined">group</span>
+                            <span>Player vs Player</span>
+                        </a>
+                        <a id="start_opvp_a">
+                            <span class="material-symbols-outlined">public</span>
+                            <span>Online Player vs Player</span>
+                        </a>
+                        <a id="start_pvain_a">
+                            <span class="material-symbols-outlined">smart_toy</span>
+                            <span>Player vs Naive AI</span>
+                        </a>
+                        <a id="start_pvaim_a">
+                            <span class="material-symbols-outlined">memory</span>
+                            <span>Player vs Medium AI</span>
+                        </a>
+                        <a id="start_pvaih_a">
+                            <span class="material-symbols-outlined">psychology</span>
+                            <span>Player vs Hard AI</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="join-game-selector">
+                    <button>Join Online Game</button>
+                    <div class="input-wrapper">
+                        <input type="text" id="join-code-input" placeholder="Enter game code: ######">
+                        <button id="join-game-button">JOIN</button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <table>
+            <thead id="leaderboard-headers">
+                <th>Rank</th>
+                <th>Player</th>
+                <th>Games Started</th>
+                <th>Games Won</th>
+            </thead>
+            <tbody id="leaderboard-body">
+                <tr>
+                    <th>1.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+                <tr>
+                    <th>2.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+                <tr>
+                    <th>3.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+                <tr>
+                    <th>4.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+                <tr>
+                    <th>5.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+                <tr>
+                    <th>6.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+                <tr>
+                    <th>7.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+                <tr>
+                    <th>8.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+                <tr>
+                    <th>9.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+                <tr>
+                    <th>10.</th>
+                    <th>N/A</th>
+                    <th>0</th>
+                    <th>0</th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCC 213 Coursework - Connect4</title>
+    <link rel="stylesheet" href="./styles/variables.css">
+    <link rel="stylesheet" href="./styles/base.css">
+    <link rel="stylesheet" href="./styles/gameboard.css">
+    <link rel="stylesheet" href="./styles/logger.css">
+    <script type='module' src="./scripts/utils/logger.js"></script>
+    <script type='module' src="./scripts/gameboard.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+</head>
+
+<body>
+    <div class="logger-main-container">
+        <div class="logger-container">
+            <span class="material-symbols-outlined" id="logger-icon">error</span>
+            <div id="logger-information">
+                <h1 id="log-title">Invalid Move</h1>
+                <p id="log-message">It is not your turn.</p>
+            </div>
+        </div>
+        <span class="material-symbols-outlined" id="logger-close">close</span>
+    </div>
+    <div class="container">
+        <div class="information">
+            <h1>Connect 4</h1>
+            <p>Connect 4 is a game where two players take turns placing a disc into one of seven columns. The goal of
+                the game is to connect four discs in a horizontal, vertical, or diagonal line. The first player to get
+                four in a row wins the game.</p>
+            <h2 id="gamemode-title">{gamemode_title}</h2>
+        </div>
+        <div class="board-container">
+            <div class="shown overlay">
+                <div class="overlay-content">
+                    <h2 id="large-game-announcements">Are You Ready?</h2>
+                    <div class="shown start-game">
+                        <h3 id="gamecode-announcement">Game Code: ######</h3>
+                        <input type="text" id="username-input" placeholder="Enter your username...">
+                        <button id="game-control">Start Game</button>
+                    </div>
+                    <div class="hidden game-over-menu">
+                        <button id="new-game-control">Start Another Game</button>
+                        <button id="main-menu-control">Main Menu</button>
+                    </div>
+                    <div class="hidden approval-menu">
+                        <button id="accept">Accept</button>
+                        <button id="decline">Decline</button>
+                    </div>
+                </div>
+            </div>
+            <div class="board">
+                <button id="1" class="button-white"></button>
+                <button id="2" class="button-white"></button>
+                <button id="3" class="button-white"></button>
+                <button id="4" class="button-white"></button>
+                <button id="5" class="button-white"></button>
+                <button id="6" class="button-white"></button>
+                <button id="7" class="button-white"></button>
+                <button id="8" class="button-white"></button>
+                <button id="9" class="button-white"></button>
+                <button id="10" class="button-white"></button>
+                <button id="11" class="button-white"></button>
+                <button id="12" class="button-white"></button>
+                <button id="13" class="button-white"></button>
+                <button id="14" class="button-white"></button>
+                <button id="15" class="button-white"></button>
+                <button id="16" class="button-white"></button>
+                <button id="17" class="button-white"></button>
+                <button id="18" class="button-white"></button>
+                <button id="19" class="button-white"></button>
+                <button id="20" class="button-white"></button>
+                <button id="21" class="button-white"></button>
+                <button id="22" class="button-white"></button>
+                <button id="23" class="button-white"></button>
+                <button id="24" class="button-white"></button>
+                <button id="25" class="button-white"></button>
+                <button id="26" class="button-white"></button>
+                <button id="27" class="button-white"></button>
+                <button id="28" class="button-white"></button>
+                <button id="29" class="button-white"></button>
+                <button id="30" class="button-white"></button>
+                <button id="31" class="button-white"></button>
+                <button id="32" class="button-white"></button>
+                <button id="33" class="button-white"></button>
+                <button id="34" class="button-white"></button>
+                <button id="35" class="button-white"></button>
+                <button id="36" class="button-white"></button>
+                <button id="37" class="button-white"></button>
+                <button id="38" class="button-white"></button>
+                <button id="39" class="button-white"></button>
+                <button id="40" class="button-white"></button>
+                <button id="41" class="button-white"></button>
+                <button id="42" class="button-white"></button>
+            </div>
+            <div class="game-info">
+                <h2 id="small-game-announcements">Waiting to Start</h2>
+                <button id="reset-game">Reset Game</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
