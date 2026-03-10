@@ -3,8 +3,8 @@ import logger from '../utils/logger.js';
 export class game {
     gamemode = null;
     players = Array(2).fill(-1); // Filled with player UUIDs
-    rows = 6
-    columns = 7
+    rows = 6;
+    columns = 7;
     activePlayer = -1;
     playerConditionCheck = Array(2).fill(false);
     usernames = Array(2).fill(null);
@@ -16,7 +16,7 @@ export class game {
         logger.trace(this.players);
     }
 
-    joinGame(uuid, username) {
+    async joinGame(uuid, username) {
         uuid = parseInt(uuid);
         if (this.players[0] === -1) {
             logger.info(`Join successful.`, 200);
@@ -38,7 +38,7 @@ export class game {
             case 1:
             case -1:
                 this.activePlayer = 0;
-                break;
+                break;async
             case 0:
                 this.activePlayer = 1;
                 break;
@@ -112,7 +112,7 @@ export class game {
         return true;
     }
 
-    move(uuid, y) {
+    async move(uuid, y) {
         uuid = parseInt(uuid);
         let player = this.activePlayer;
         let moveMessage = JSON.stringify({
@@ -133,10 +133,10 @@ export class game {
             return moveMessage;
         }
 
-        for (let i = this.board[y].length - 1; i >= 0; i--) {
+        for (let i = (this.rows - 1); i >= 0; i--) {
             if (this.board[y][i] === null) {
                 this.board[y][i] = player;
-                this.set_activePlayer();
+                await this.set_activePlayer();
                 moveMessage = JSON.stringify({
                     type: "newMove",
                     success: true,
@@ -144,8 +144,8 @@ export class game {
                     whoNext: this.activePlayer,
                     row: i,
                     column: y,
-                    win: this.checkWin(player),
-                    draw: this.hasDraw()
+                    win: await this.checkWin(player),
+                    draw: await this.hasDraw()
                 });
                 return moveMessage;
             }
@@ -230,7 +230,7 @@ export class game {
         return JSON.stringify(jsonMessage);
     }
 
-    async resetBoard() {
+    resetBoard() {
         this.board = Array.from({ length: this.columns }, () => Array(this.rows).fill(null));
         this.activePlayer = -1;
         this.set_activePlayer();

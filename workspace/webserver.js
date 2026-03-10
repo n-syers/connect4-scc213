@@ -162,13 +162,12 @@ app.get("/opvp", async (req, res) => {
 // verify game code.
 app.post("/verifycode", async (req, res) => {
     logger.trace(`Verifying Game Code.`, 102);
-    const gamecode = req.body;
+    const gamecode = req.body.gamecode;
     try {
         const validcode = await gameManager.verifyGameCode(gamecode);
-        res.json({
+        res.status(200).json({
             verify: validcode
         });
-        res.status(100);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to verify game' });
@@ -189,18 +188,23 @@ app.post("/move", async (req, res) => {
             logger.trace(move, 200);
             if (gamemode === "opvp") {
                 sendWS(uuid, gamecode, parsedData);
+            } else if (gamemode !== "lpvp" && gamemode !== "opvp") {
+                logger.debug(`Processing AI Move for game ${gamecode}`, 102);
+                const aiMove = await gameManager.moveAi(gamecode, gamemode);
+                const ws = getWebSocketByUUID(uuid);
+                logger.debug(`Gamecode: ${gamecode} AI Move: ${aiMove}`);
+                logger.debug(`Sending AI move to player ${uuid}`);
+                if (ws) {
+                    ws.send(aiMove);
+                    logger.info(`Ai player move message sent to ${uuid}`);
+                } else {
+                    logger.error(`WebSocket for player ${uuid} not found. Unable to send AI move message.`, 500);
+                }
             }
-        } else if (gamemode === "pvain" || gamemode === "pvaim" || gamemode === "pvaih") {
-            const aiMove = await gameManager.moveAi(gamecode, gamemode);
-            const ws = getWebSocketByUUID(uuid);
-            logger.debug(`Gamecode: ${gamecode} AI Move: ${aiMove}`);
-            logger.debug(`Sending AI move to player ${uuid}`);
-            if (ws) {
-                ws.send(aiMove);
-                logger.info(`Ai player move message sent to ${uuid}`);
-            }
+            res.status(200).send(move);
+        } else {
+            throw new Error(`Move failed for gamecode: ${gamecode}`);
         }
-        res.status(200).send(move);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error });
@@ -264,12 +268,12 @@ app.post("/restartGame", async (req, res) => {
     let hasReset = false;
     let messageNum = [];
 
-    const gamemode = gameManager.getGamemode(gamecode);
-    const resetStatus = gameManager.addResetRequest(gamecode, uuid);
+    const gamemode = await gameManager.getGamemode(gamecode);
+    const resetStatus = await gameManager.addResetRequest(gamecode, uuid);
     let parsedData = JSON.parse(resetStatus);
     logger.trace(`Reset Status: ${resetStatus}`, 102);
 
-    const players = gameManager.getPlayerUUIDs(gamecode);
+    const players = await gameManager.getPlayerUUIDs(gamecode);
 
     if (parsedData.canReset) {
         await gameManager.resetGame(gamecode);
@@ -305,7 +309,7 @@ app.post("/declineReset", async (req, res) => {
     const uuid = parseInt(req.body.uuid);
     logger.debug(`Reset decline requested by ${uuid}`, 102);
 
-    const gamemode = gameManager.getGamemode(gamecode);
+    const gamemode = await gameManager.getGamemode(gamecode);
 
     if (gamemode === "opvp") {
         const wsMessage = {

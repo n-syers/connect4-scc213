@@ -18,7 +18,12 @@ const titles = {
     "pvaih": "Player vs Ai (Hard)"
 };
 
-let messages = [];
+// Default Messages (Overridden based on gamemode)
+let messages = [
+    ["Red's Turn", "Red Wins!"],
+    ["Yellow's Turn", "Yellow Wins!"],
+    ["Waiting For Opponent", "Draw!"]
+];
 
 const loggerElement = document.getElementsByClassName("logger-main-container")[0];
 const loggerIcon = document.getElementById("logger-icon");
@@ -27,13 +32,16 @@ const loggerMessage = document.getElementById("log-message");
 
 const boardButtons = document.querySelectorAll('.board button');
 
+const acceptButton = document.getElementById('accept');
+const declineButton = document.getElementById('decline');
+
 
 const log = new logger(loggerElement, loggerIcon, loggerTitle, loggerMessage);
 
 try {
     verifycode();
     document.getElementById("gamecode-announcement").textContent = `Game Code: ${gamecode}`;
-    gamemode = sessionStorage.getItem("gamemode");
+    gamemode = localStorage.getItem("gamemode");
     document.getElementById("gamemode-title").textContent = titles[gamemode];
     switch (gamemode) {
         case "lpvp":
@@ -60,22 +68,20 @@ try {
             ];
             break;
     }
-    if (gamemode === "opvp") {
+    if (gamemode !== "lpvp") {
         wsOpen();
-        document.getElementById("gamecode-announcement").style.display = "flex";
-
     }
 
     const controlButton = document.getElementById('game-control');
     controlButton.addEventListener('click', (event) => startGame());
 
-    const resetAcceptButton = document.getElementById('accept');
     const resetGameButton = document.getElementById('reset-game');
     resetGameButton.addEventListener('click', (event) => resetGame());
-    resetAcceptButton.addEventListener('click', (event) => resetGame());
 
-    const resetDeclineButton = document.getElementById('decline');
-    resetDeclineButton.addEventListener('click', (event) => declineReset());
+    const backButton = document.getElementById('main-menu-control');
+    backButton.addEventListener('click', (event) => leaveLobby());
+
+    window.addEventListener('beforeunload', (event) => leaveLobby());
 
     // Add an event listener to each button on the board.
     boardButtons.forEach(button => {
@@ -87,10 +93,11 @@ try {
 
 
 async function verifycode() {
-    gamecode = sessionStorage.getItem("gamecode");
+    gamecode = localStorage.getItem("gamecode");
     if (gamecode === null) {
         log.error("No game code detected. Redirecting to main menu.", 102, true, "No Game Code Detected");
-        window.location.href = './'
+        window.location.href = './';
+        return;
     }
     log.info(`Verifying game code ${gamecode}`, 102);
     try {
@@ -101,7 +108,8 @@ async function verifycode() {
             body: textJSON
         });
         if (!response.ok) {
-            throw new Error(response.body, response.status);
+            const errText = await response.text();
+            throw new Error(errText);
         }
         log.info("Game code verified", response.status)
     } catch (error) {
@@ -117,7 +125,10 @@ async function declineReset() {
             headers: { "Content-Type": "application/json" },
             body: textJSON
         });
-        if (!response.ok) { throw new Error(response.text(), response.status); }
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText);
+        }
         toggleOverlay("hide");
     } catch (error) {
         log.error(`declineReset Error: ${error}`, error.status);
@@ -138,7 +149,10 @@ async function move(id) {
             headers: { "Content-Type": "application/json" },
             body: textJSON
         });
-        if (!response.ok) { throw new Error(response.text(), response.status); }
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText);
+        }
         const data = await response.text();
         log.trace(`Move Response: ${data}`, 200);
         const parsedData = JSON.parse(data);
@@ -172,7 +186,7 @@ async function wsOpen() {
             case "setUUID":
                 log.info(`Web Socket UUID: ${event.data}`, 200);
                 let socketId = JSON.parse(event.data).socketId;
-                sessionStorage.setItem('UUID', socketId);
+                localStorage.setItem('UUID', socketId);
                 uuid = socketId;
                 joinGameWithUUID();
                 break;
@@ -201,6 +215,10 @@ async function wsOpen() {
                     updateGameAnnouncements(messages[message.setMessage[0]][0], false, true, colour[message.setMessage[0]]);
                 } else {
                     updateGameAnnouncements(messages[message.setMessage[0]][message.setMessage[1]], false, true);
+                    acceptButton.removeEventListener('click', (event) => resetGame());
+                    declineButton.removeEventListener('click', (event) => declineReset());
+                    acceptButton.addEventListener('click', (event) => resetGame());
+                    declineButton.addEventListener('click', (event) => declineReset());
                     toggleOverlay("reset");
                 }
                 break;
@@ -215,6 +233,11 @@ async function wsOpen() {
     ws.onerror = function (error) {
         log.error("WebSocket error:", error);
     };
+    ws.onclose = function () {
+        log.warn("WebSocket connection closed. Redirecting to main menu.", 200);
+        leaveLobby();
+        window.location.href = './';
+    }
 }
 
 function updateButtonColour(row, column, activePlayer) {
@@ -241,6 +264,13 @@ function updateGameAnnouncements(message, small, large, colour = `--clr-primary-
     }
 }
 
+async function leaveLobby() {
+    ws.close(1000, "Client Leaving Lobby");
+    localStorage.clear();
+    log.info("Leaving lobby and clearing session storage.", 200);
+    window.location.href = './';
+}
+
 async function startGame() {
     log.debug("Start Game Button Pressed", 200);
     try {
@@ -250,7 +280,7 @@ async function startGame() {
             log.error("Username cannot be empty.", 422, true, "Empty Username");
             return;
         }
-        sessionStorage.setItem("username", username);
+        localStorage.setItem("username", username);
         const textJSON = JSON.stringify({ gamecode: gamecode, uuid: uuid, username: username });
         const response = await fetch(url + "/startGame", {
             method: "POST",
@@ -258,7 +288,8 @@ async function startGame() {
             body: textJSON
         });
         if (!response.ok) {
-            throw new Error(response.body, response.status);
+            const errText = await response.text();
+            throw new Error(errText);
         }
         log.info("Game code verified", response.status);
         const data = await response.text();
@@ -285,7 +316,10 @@ async function resetGame() {
             headers: { "Content-Type": "application/json" },
             body: textJSON
         });
-        if (!response.ok) { throw new Error(response.text(), response.status); }
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText);
+        }
         const data = await response.text();
         let parsedData = JSON.parse(data);
 
@@ -318,12 +352,12 @@ async function joinGameWithUUID() {
             headers: { "Content-Type": "application/json" },
             body: textJSON
         });
-        if (!response.ok) {
-            throw new Error(`${response.json()}`, response.status);
-        }
         const result = await response.json();
+        if (!response.ok) {
+            throw new Error(JSON.stringify(result));
+        }
         if (!result.joinStatus) {
-            sessionStorage.clear();
+            localStorage.clear();
             throw new Error("Unable to join game. Redirecting to main menu.", 403);
         }
         log.info(`Successfully joined game ${gamecode}`, 200);

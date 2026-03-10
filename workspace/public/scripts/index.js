@@ -27,7 +27,7 @@ try {
         try {
             let gamecode = document.getElementById('join-code-input').value;
             log.info(`Joining Game with Code: ${gamecode}`, 102);
-            setsessionStorageItems(gamecode, 'opvp');
+            setlocalStorageItems(gamecode, 'opvp');
             window.location.href = './gameboard';
         } catch (error) {
             log.error(error.message);
@@ -39,11 +39,11 @@ try {
 }
 
 
-function setsessionStorageItems(gamecode, gamemode, uuid = -1) {
+function setlocalStorageItems(gamecode, gamemode, uuid = -1) {
     try {
-        sessionStorage.setItem('gamecode', gamecode);
-        sessionStorage.setItem('gamemode', gamemode);
-        sessionStorage.setItem('UUID', uuid);
+        localStorage.setItem('gamecode', gamecode);
+        localStorage.setItem('gamemode', gamemode);
+        localStorage.setItem('UUID', uuid);
     } catch (error) {
         log.error(error.message);
     }
@@ -54,11 +54,12 @@ async function startGame(gamemode) {
     try {
         const response = await fetch(url + `/${gamemode}`);
         if (!response.ok) {
-            throw new Error(`${response.json()}`, response.status);
+            const errData = await response.json();
+            throw new Error(JSON.stringify(errData));
         }
         const result = await response.json();
         log.debug(JSON.stringify(result), result.status);
-        setsessionStorageItems(result.gameCode, gamemode);
+        setlocalStorageItems(result.gameCode, gamemode);
         window.location.href = './gameboard';
     } catch (error) {
         log.error(error.message);

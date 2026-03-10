@@ -42,16 +42,18 @@ async function move(gamecode, y, uuid) {
         });
         return jsonMoveMessage;
     };
-    const temp_game = gameMap.get(parseInt(gamecode));
+    const code = parseInt(gamecode);
+    const temp_game = gameMap.get(code);
     const move_success = temp_game.move(uuid, y);
-    logger.trace(`Move processed for gamecode: ${gamecode} | Player: ${uuid} | Column: ${y} | Success: ${move_success}`, 200);
+    logger.trace(`Move processed for gamecode: ${code} | Player: ${uuid} | Column: ${y} | Success: ${move_success}`, 200);
     return move_success;
 }
 
 async function joinExistingGame(gamecode, uuid) {
-    if (verifyGameCode(gamecode)) {
-        const temp_game = gameMap.get(gamecode);
-        const join_success = temp_game.joinGame(uuid);
+    const code = parseInt(gamecode);
+    if (await verifyGameCode(code)) {
+        const temp_game = gameMap.get(code);
+        const join_success = await temp_game.joinGame(uuid);
         return join_success;
     };
     return false;
@@ -79,18 +81,22 @@ async function set_readyPlayer(gamecode, uuid, username) {
     return success;
 }
 
-function getGamemode(gamecode) {
+async function getGamemode(gamecode) {
     gamecode = parseInt(gamecode);
     logger.debug("Retrieving Game", 102);
     const temp_game = gameMap.get(gamecode);
-    const gamemode = temp_game.get_gamemode();
+    const gamemode = await temp_game.get_gamemode();
     return gamemode;
 }
 
-function getPlayerUUIDs(gamecode) {
+async function getPlayerUUIDs(gamecode) {
     logger.debug("Retrieving Player UUIDs", 102);
     const temp_game = gameMap.get(gamecode);
-    const players = temp_game.getPlayers();
+    const players = await temp_game.getPlayers();
+    if (!players) {
+        logger.warn(`No players found for gamecode: ${gamecode}`);
+        return null;
+    }
     return players;
 }
 
@@ -152,13 +158,14 @@ async function handleHardAI(gamecode) {
     const temp_game = gameMap.get(gamecode);
     let board = Array.from(await temp_game.getBoard());
     const minimaxAI = new minimax(board, DEPTH, -1, 0);
-    let aiMove = await temp_game.move(-1, minimaxAI.getBestMove());
+    let bestMove = minimaxAI.getBestMove();
+    let aiMove = await temp_game.move(-1, bestMove);
     let parsedData = JSON.parse(aiMove);
 
     while (!parsedData.success) {
         logger.debug(`Hard AI Move Failed. Retrying...`, 102);
         logger.trace(aiMove, 201);
-        aiMove = await temp_game.move(-1, minimaxAI.bestColumn);
+        aiMove = await temp_game.move(-1, bestMove);
         parsedData = JSON.parse(aiMove);
     }
     return aiMove;
@@ -169,7 +176,7 @@ async function testAiWinConditions(board, player, temp_game) {
         for (let row = board[col].length - 1; row >= 0; row--) {
             if (board[col][row] === null) {
                 board[col][row] = player;
-                let hasWon = await temp_game.checkWin(player, board);
+                let hasWon = temp_game.checkWin(player, board);
                 if (hasWon) {
                     logger.debug(`Winning move located for player ${player} at Column ${col} (Row ${row})`, 102);
                     let rowBelow = row + 1;
@@ -192,10 +199,20 @@ async function testAiWinConditions(board, player, temp_game) {
     return null;
 }
 
-function addResetRequest(gamecode, uuid) {
+async function addResetRequest(gamecode, uuid) {
     const temp_game = gameMap.get(gamecode);
-    let status = temp_game.addResetRequest(uuid);
+    let status = await temp_game.addResetRequest(uuid);
     return status;
+}
+
+function closeLobby(gamecode) {
+    try {
+        gameMap.delete(parseInt(gamecode));
+        return true;
+    } catch (error) {
+        logger.error(`Error closing lobby for gamecode: ${gamecode} | Error: ${error.message}`, 500);
+        return false;
+    }
 }
 
 export default {
@@ -209,7 +226,8 @@ export default {
     moveAi,
     addResetRequest,
     resetGame,
+    closeLobby,
     joinExistingGame
 };
 
-export { createGame, verifyGameCode, move, getGamemode, joinExistingGame, set_readyPlayer, canStart, getPlayerUUIDs, moveAi, resetGame, addResetRequest };
+export { createGame, closeLobby, verifyGameCode, move, getGamemode, joinExistingGame, set_readyPlayer, canStart, getPlayerUUIDs, moveAi, resetGame, addResetRequest };
