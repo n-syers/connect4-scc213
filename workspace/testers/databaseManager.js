@@ -4,10 +4,17 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-dbm.open_connection();
-sleep(500);
-dbm.create_table();
-sleep(500);
-dbm.insertFalseData();
-sleep(500);
-dbm.getMostGamesStarted();
+/* Main function to test database operations */
+
+function main() {
+    dbm.open_connection();
+    dbm.create_table();
+    dbm.insertFalseData();
+    dbm.getMostGamesStarted();
+    dbm.addGame("Test", "Test2", "Test");
+    dbm.addGame("Test", "Test4", "Test");
+    dbm.getMostGamesStarted();
+
+}
+
+main();

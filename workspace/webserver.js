@@ -201,6 +201,10 @@ app.post("/move", async (req, res) => {
                     logger.error(`WebSocket for player ${uuid} not found. Unable to send AI move message.`, 500);
                 }
             }
+            // Close lobby if game won. before sending response.
+            if (parsedData.win) {
+                await gameManager.closeLobby(gamecode);
+            }
             res.status(200).send(move);
         } else {
             throw new Error(`Move failed for gamecode: ${gamecode}`);
@@ -351,3 +355,12 @@ function sendWS(firstPlayerUUID, gamecode, message) {
         logger.error(`WebSocket for player ${sendTo} not found. Unable to send message.`, 500);
     }
 }
+
+process.on('exit', () => {
+    logger.info('Server shutting down', 200);
+});
+
+process.on('uncaughtException', (err) => {
+    logger.error(`Uncaught Exception: ${err.message} | Stack: ${err.stack}`, 500);
+    process.exit(1);
+});

@@ -19,12 +19,12 @@ export class game {
     async joinGame(uuid, username) {
         uuid = parseInt(uuid);
         if (this.players[0] === -1) {
-            logger.info(`Join successful.`, 200);
+            logger.info(`${username} joined successful.`, 200);
             this.players[0] = uuid;
             this.usernames[0] = username;
             return true;
         } else if (this.players[1] === -1) {
-            logger.info(`Join successful.`, 200);
+            logger.info(`${username} joined successful.`, 200);
             this.players[1] = uuid;
             this.usernames[1] = username;
             return true;
@@ -38,7 +38,7 @@ export class game {
             case 1:
             case -1:
                 this.activePlayer = 0;
-                break;async
+                break; async
             case 0:
                 this.activePlayer = 1;
                 break;
@@ -154,7 +154,7 @@ export class game {
         return moveMessage;
     }
 
-    async readyPlayer(uuid) {
+    async readyPlayer(uuid, username) {
         uuid = parseInt(uuid);
         logger.trace(this.players);
         if (this.playerConditionCheck[1] === true && this.playerConditionCheck[0] === true) {
@@ -164,13 +164,16 @@ export class game {
         if (this.gamemode !== "opvp") {
             this.playerConditionCheck[0] = true;
             this.playerConditionCheck[1] = true;
+            if (username) this.usernames[0] = username;
             return true;
         }
 
         if (this.players[0] === uuid) {
             this.playerConditionCheck[0] = true;
+            if (username) this.usernames[0] = username;
         } else {
             this.playerConditionCheck[1] = true;
+            if (username) this.usernames[1] = username;
         }
         return true;
     }
@@ -239,6 +242,10 @@ export class game {
 
     async getBoard() {
         return this.board;
+    }
+
+    async getUsernames() {
+        return this.usernames;
     }
 
     async setBoard(newBoard) {

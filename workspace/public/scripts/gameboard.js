@@ -181,7 +181,7 @@ async function wsOpen() {
 
     ws.onmessage = function (event) {
         const message = JSON.parse(event.data)
-        log.info(`WebSocket message received: ${message.type} | ${event.data}`, 200, true, "WebSocket Message Received");
+        log.trace(`WebSocket Message Received: ${event.data}`, 200);
         switch (message.type) {
             case "setUUID":
                 log.info(`Web Socket UUID: ${event.data}`, 200);
@@ -265,7 +265,12 @@ function updateGameAnnouncements(message, small, large, colour = `--clr-primary-
 }
 
 async function leaveLobby() {
-    ws.close(1000, "Client Leaving Lobby");
+    try {
+        ws.close(1000, "Client Leaving Lobby");
+
+    } catch (error) {
+        log.warn('No WebSocket connection to close.', 400);
+    }
     localStorage.clear();
     log.info("Leaving lobby and clearing session storage.", 200);
     window.location.href = './';

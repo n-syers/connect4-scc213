@@ -1,8 +1,12 @@
 import * as logger from './logger.js';
 import { game } from '../modules/gameClass.js';
 import { minimax } from '../modules/minimax.js';
+import * as dbm from './databaseManager.js';
 
 const gameMap = new Map();
+
+dbm.open_connection(); // Keep database connection open for duration of server uptime.
+
 
 async function createGame(gamemode) {
     let gamecode = await generateGameCode();
@@ -44,8 +48,39 @@ async function move(gamecode, y, uuid) {
     };
     const code = parseInt(gamecode);
     const temp_game = gameMap.get(code);
-    const move_success = temp_game.move(uuid, y);
-    logger.trace(`Move processed for gamecode: ${code} | Player: ${uuid} | Column: ${y} | Success: ${move_success}`, 200);
+    const gamemode = await temp_game.get_gamemode(gamecode);
+    const move_success = await temp_game.move(uuid, y);
+
+    // Check win/draw conditions and update database if game has concluded
+    let parsedMove = JSON.parse(move_success);
+    let player1 = "Unknown";
+    let player2 = "Unknown";
+    let winner = "Unkown";
+    if (parsedMove.win || parsedMove.draw) {
+        switch (gamemode) {
+            case "lpvp":
+                player1 = temp_game.usernames[0];
+                dbm.addGame(player1, player1, null); // Cannot win local matches, so winner is set to null.
+                logger.info(`Game concluded. Recorded result in database.`, 201);
+                break;
+            case "opvp":
+                player1 = temp_game.usernames[0];
+                player2 = temp_game.usernames[1];
+                winner = parsedMove.win ? temp_game.usernames[parsedMove.whoMoved] : null;
+                dbm.addGame(player1, player2, winner);
+                logger.info(`Game concluded. Recorded result in database.`, 201);
+                break;
+            case "pvain":
+            case "pvaim":
+            case "pvaih":
+                player1 = temp_game.usernames[0];
+                winner = (parsedMove.win && parsedMove.whoMoved == 1) ? temp_game.usernames[0] : null;
+                dbm.addGame(player1, null, winner);
+                break;
+            default:
+                logger.warn("No Gamemode Passed", 500);
+        }
+    }
     return move_success;
 }
 
@@ -205,15 +240,24 @@ async function addResetRequest(gamecode, uuid) {
     return status;
 }
 
-function closeLobby(gamecode) {
+async function closeLobby(gamecode) {
     try {
         gameMap.delete(parseInt(gamecode));
-        return true;
     } catch (error) {
         logger.error(`Error closing lobby for gamecode: ${gamecode} | Error: ${error.message}`, 500);
-        return false;
     }
 }
+
+process.on('exit', () => {
+    logger.info('Server shutting down. Closing database connection.', 200);
+    dbm.close_connection();
+});
+
+process.on('uncaughtException', (err) => {
+    logger.error(`Uncaught Exception: ${err.message} | Stack: ${err.stack}`, 500);
+    dbm.close_connection();
+    process.exit(1);
+});
 
 export default {
     createGame,
