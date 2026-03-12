@@ -18,48 +18,7 @@
     border-radius: 5px;
 }
 
-.new-game-selector {
-    position: relative;
-    display: inline-block;
-}
-
-
-.gamemodes {
-    display: none;
-    position: absolute;
-    background-color: var(--clr-surface-a10);
-    border: 2px solid var(--clr-success-a0);
-    border-radius: 5px;
-}
-
-.gamemodes a {
-    color: var(--clr-light-a0);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    width: 15rem;
-    height: 2rem;
-
-}
-
-.gamemodes a span {
-    margin-left: 10px;
-}
-
-.gamemodes a:hover {
-    background-color: var(--clr-success-a0);
-}
-
-.new-game-selector:hover .gamemodes {
-    display: block;
-}
-
-
-.new-game-selector #start-game:hover {
-    color: var(--clr-success-a10);
-}
-
-.input-wrapper input {
+.input-container input {
     flex: 1;
     color: var(--clr-light-a0);
     background-color: var(--clr-surface-a20);
@@ -69,13 +28,21 @@
     border-radius: 0.25rem 0 0 0.25rem;
 }
 
-.input-wrapper button {
+.input-container button {
     color: var(--clr-success-a0);
     border-top: 2px solid var(--clr-success-a0);
     right: 0;
     border: none;
     justify-content: center;
     background-color: transparent;
+}
+
+.input-container {
+    display: none;
+    position: absolute;
+    background-color: var(--clr-surface-a10);
+    border: 2px solid var(--clr-success-a0);
+    border-radius: 5px;
 }
 
 
@@ -85,15 +52,7 @@
     width: 15rem;
 }
 
-.input-wrapper {
-    display: none;
-    position: absolute;
-    background-color: var(--clr-surface-a10);
-    border: 2px solid var(--clr-success-a0);
-    border-radius: 5px;
-}
-
-.join-game-selector:hover .input-wrapper {
+.join-game-selector:hover .input-container {
     display: block;
 }
 
@@ -103,6 +62,16 @@
     border-radius: 0;
 }
 
+.leaderboard-container {
+    display: flex;
+    flex-direction: column;
+    width: 800px;
+}
+
+.leaderboard-container table {
+    border: 2px solid var(--clr-warning-a0);
+    padding: 1rem;
+}
 
 thead tr {
     color: var(--clr-primary-a30);
@@ -111,4 +80,79 @@ thead tr {
 tbody tr {
     border-bottom: 1px solid var(--clr-surface-a20);
     color: var(--clr-light-a0);
+}
+
+@media (min-width: 1100px) {
+    #start-game {
+        display: none;
+    }
+
+    .gamemodes {
+        display: flex;
+        flex-direction: row;
+        height: 2rem;
+        width: max-content;
+    }
+
+    .gamemodes a {
+        color: var(--clr-success-a0);
+        font-size: small;
+        font-weight: bold;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border: 2px solid var(--clr-success-a0);
+        border-radius: 0.25rem;
+        margin-right: 0.5rem;
+        padding: 0.5rem 0.5rem;
+    }
+
+    .gamemodes a span {
+        padding-right: 0.25rem;
+    }
+}
+
+@media (max-width: 1099px) {
+    .new-game-selector {
+        position: relative;
+        display: inline-block;
+    }
+
+
+    .gamemodes {
+        display: none;
+        position: absolute;
+        background-color: var(--clr-surface-a10);
+        border: 2px solid var(--clr-success-a0);
+        border-radius: 5px;
+    }
+
+    .gamemodes a {
+        color: var(--clr-light-a0);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        width: 15rem;
+        height: 2rem;
+
+    }
+
+    .gamemodes a span {
+        margin-left: 10px;
+    }
+
+    .gamemodes a:hover {
+        background-color: var(--clr-success-a0);
+    }
+
+    .new-game-selector:hover .gamemodes {
+        display: block;
+    }
+
+
+    .new-game-selector #start-game:hover {
+        color: var(--clr-success-a10);
+    }
 }

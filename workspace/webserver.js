@@ -5,6 +5,7 @@ const WebSocket = require('ws');
 const path = require('path');
 const logger = require('./utils/logger.js');
 const gameManager = require('./utils/gameManager.js');
+const dbm = require('./utils/databaseManager.js');
 
 const port = 3000;
 const wsPort = 3030;
@@ -57,7 +58,7 @@ app.use(cors());
 
 // Log all requests
 app.use((req, res, next) => {
-    logger.info(`Client connected from ${req.ip}:${req.socket.remotePort} | ${req.method} ${req.url}`, 200);
+    logger.info(`[${req.ip}] has requested [${req.method}] for [${req.url}]`, 102);
     next();
 })
 // Use JSON
@@ -74,8 +75,23 @@ app.use('/', express.static(path.join(__dirname, 'public')));
 // Update leaderboard information
 app.get("/leaderboard", (req, res) => {
     logger.info(`Processing leaderboard request.`, 102);
-    res.json({
+    const leaderboardBy = req.body.leaderboardBy;
+    dbm.open_connection();
+    switch (leaderboardBy) {
+        case "mostGamesStarted":
+            leaderboardData = dbm.getMostGamesStarted();
+            break;
+        case "mostWins":
+            logger.warn("Most Wins Not Implemented.", 400);
+            leaderboardData = dbm.getMostWins();
+            break;
+        default:
+            logger.warn(`Invalid leaderboardBy value: ${leaderboardBy}. Defaulting to mostGamesStarted.`, 400);
+            leaderboardData = dbm.getMostGamesStarted();
+    }
+    res.status(200).json({
         message: "Leaderboard",
+        data: leaderboardData
     });
 })
 
@@ -342,8 +358,8 @@ server.listen(wsPort, ip, () => {
 });
 
 
-function sendWS(firstPlayerUUID, gamecode, message) {
-    const players = gameManager.getPlayerUUIDs(gamecode);
+async function sendWS(firstPlayerUUID, gamecode, message) {
+    const players = await gameManager.getPlayerUUIDs(gamecode);
     logger.trace(`Sending WebSocket message to game ${gamecode} | players: ${players} | firstPlayerUUID: ${firstPlayerUUID}`, 102);
     const sendTo = (firstPlayerUUID === players[0]) ? players[1] : players[0];
     const ws = getWebSocketByUUID(sendTo);

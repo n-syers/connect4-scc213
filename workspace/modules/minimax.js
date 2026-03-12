@@ -207,7 +207,7 @@ export class minimax {
             let score = this.minimaxSearch(newState, this.depth - 1, false);
             logger.debug(`Minimax evaluated column ${move} with score ${score}`, 102);
 
-            if (score > bestScore) {
+            if (score >= bestScore) {
                 bestScore = score;
                 bestMove = move;
             }
@@ -216,7 +216,9 @@ export class minimax {
 
         this.bestColumn = bestMove;
         logger.info(`Best move determined by minimax: Column ${bestMove} with score ${bestScore}`, 200);
-        this.stateZero = this.move(this.stateZero, bestMove, this.maximiser);
+        if (bestMove !== null) {
+            this.stateZero = this.move(this.stateZero, bestMove, this.maximiser);
+        }
         return this.bestColumn;
     }
 

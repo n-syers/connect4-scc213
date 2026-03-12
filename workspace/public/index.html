@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="./styles/base.css">
     <link rel="stylesheet" href="./styles/index.css">
     <link rel="stylesheet" href="./styles/logger.css">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <script type='module' src="./scripts/utils/logger.js"></script>
     <script type='module' src="./scripts/index.js"></script>
 
@@ -32,7 +33,7 @@
             the game is to connect four discs in a horizontal, vertical, or diagonal line. The first player to get
             four in a row wins the game.</p>
         <div class="create-game-container">
-            <h2>Start New Game</h2>
+            <h2>Select A Mode To Play</h2>
             <nav>
                 <div class="new-game-selector">
                     <button class="primary-button" id="start-game">Select Gamemode</button>
@@ -61,83 +62,86 @@
                 </div>
                 <div class="join-game-selector">
                     <button>Join Online Game</button>
-                    <div class="input-wrapper">
+                    <div class="input-container">
                         <input type="text" id="join-code-input" placeholder="Enter game code: ######">
                         <button id="join-game-button">JOIN</button>
                     </div>
                 </div>
             </nav>
         </div>
-        <table>
-            <thead id="leaderboard-headers">
-                <th>Rank</th>
-                <th>Player</th>
-                <th>Games Started</th>
-                <th>Games Won</th>
-            </thead>
-            <tbody id="leaderboard-body">
-                <tr>
-                    <th>1.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-                <tr>
-                    <th>2.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-                <tr>
-                    <th>3.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-                <tr>
-                    <th>4.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-                <tr>
-                    <th>5.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-                <tr>
-                    <th>6.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-                <tr>
-                    <th>7.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-                <tr>
-                    <th>8.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-                <tr>
-                    <th>9.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-                <tr>
-                    <th>10.</th>
-                    <th>N/A</th>
-                    <th>0</th>
-                    <th>0</th>
-                </tr>
-            </tbody>
-        </table>
+        <div class="leaderboard-container">
+            <h2>Leaderboard</h2>
+            <table>
+                <thead id="leaderboard-headers">
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Games Started</th>
+                    <th>Games Won</th>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr>
+                        <th>1.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                    <tr>
+                        <th>2.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                    <tr>
+                        <th>3.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                    <tr>
+                        <th>4.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                    <tr>
+                        <th>5.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                    <tr>
+                        <th>6.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                    <tr>
+                        <th>7.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                    <tr>
+                        <th>8.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                    <tr>
+                        <th>9.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                    <tr>
+                        <th>10.</th>
+                        <th>N/A</th>
+                        <th>0</th>
+                        <th>0</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 

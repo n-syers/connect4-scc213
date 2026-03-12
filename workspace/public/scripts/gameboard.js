@@ -1,4 +1,4 @@
-import { logger } from './utils/logger.js';
+import * as log from './utils/logger.js';
 
 const url = window.location.origin;
 const colour = ["red", "yellow", "--clr-primary-a20"];
@@ -36,7 +36,7 @@ const acceptButton = document.getElementById('accept');
 const declineButton = document.getElementById('decline');
 
 
-const log = new logger(loggerElement, loggerIcon, loggerTitle, loggerMessage);
+const logger = new log.logger(loggerElement, loggerIcon, loggerTitle, loggerMessage);
 
 try {
     verifycode();
@@ -88,18 +88,18 @@ try {
         button.addEventListener('click', (event) => move(event.target.id));
     });
 } catch (error) {
-    log.error(error)
+    logger.error(error)
 }
 
 
 async function verifycode() {
     gamecode = localStorage.getItem("gamecode");
     if (gamecode === null) {
-        log.error("No game code detected. Redirecting to main menu.", 102, true, "No Game Code Detected");
+        logger.error("No game code detected. Redirecting to main menu.", 102, true, "No Game Code Detected");
         window.location.href = './';
         return;
     }
-    log.info(`Verifying game code ${gamecode}`, 102);
+    logger.info(`Verifying game code ${gamecode}`, 102);
     try {
         const textJSON = JSON.stringify({ gamecode: gamecode });
         const response = await fetch(url + "/verifycode", {
@@ -111,9 +111,9 @@ async function verifycode() {
             const errText = await response.text();
             throw new Error(errText);
         }
-        log.info("Game code verified", response.status)
+        logger.info("Game code verified", response.status)
     } catch (error) {
-        log.error(error, error.status)
+        logger.error(error, error.status)
     }
 }
 
@@ -131,14 +131,14 @@ async function declineReset() {
         }
         toggleOverlay("hide");
     } catch (error) {
-        log.error(`declineReset Error: ${error}`, error.status);
+        logger.error(`declineReset Error: ${error}`, error.status);
     }
 }
 
 async function move(id) {
-    log.info(`Button with ID ${id} pressed.`);
+    logger.info(`Button with ID ${id} pressed.`);
     if (hasWon || !gameStarted) {
-        log.info("Game inactive.", 200);
+        logger.info("Game inactive.", 200);
         return;
     }
     const y = Math.floor((id - 1) % 7); // Column
@@ -154,16 +154,16 @@ async function move(id) {
             throw new Error(errText);
         }
         const data = await response.text();
-        log.trace(`Move Response: ${data}`, 200);
+        logger.trace(`Move Response: ${data}`, 200);
         const parsedData = JSON.parse(data);
         if (parsedData.success) {
             updateButtonColour(parsedData.row, parsedData.column, parsedData.whoMoved);
             handleMessages(parsedData.win, parsedData.draw, true, colour[parsedData.whoNext]);
         } else {
-            log.warn("Move Attempted Unsuccessful", 100, true, "Invalid Move")
+            logger.warn("Move Attempted Unsuccessful", 100, true, "Invalid Move")
         };
     } catch (error) {
-        log.error(error, error.status)
+        logger.error(error, error.status)
     }
 }
 
@@ -175,39 +175,39 @@ async function wsOpen() {
     ws = new WebSocket(`ws://127.0.0.1:3030`);
 
     ws.onopen = function () {
-        log.info("WebSocket connected", 200);
-        log.info(`WebSocket URL: ${ws.url}`, 200);
+        logger.info("WebSocket connected", 200);
+        logger.info(`WebSocket URL: ${ws.url}`, 200);
     };
 
     ws.onmessage = function (event) {
         const message = JSON.parse(event.data)
-        log.trace(`WebSocket Message Received: ${event.data}`, 200);
+        logger.trace(`WebSocket Message Received: ${event.data}`, 200);
         switch (message.type) {
             case "setUUID":
-                log.info(`Web Socket UUID: ${event.data}`, 200);
+                logger.info(`Web Socket UUID: ${event.data}`, 200);
                 let socketId = JSON.parse(event.data).socketId;
                 localStorage.setItem('UUID', socketId);
                 uuid = socketId;
                 joinGameWithUUID();
                 break;
             case "newMove":
-                log.info(`New Move Detected`, 200);
+                logger.info(`New Move Detected`, 200);
                 updateButtonColour(message.row, message.column, message.whoMoved);
                 if (message.success) {
                     handleMessages(message.win, message.draw, false, colour[message.whoNext]);
                 };
                 break;
             case "startGame":
-                log.info(`Start Game Detected: ${event.data}`, 200);
+                logger.info(`Start Game Detected: ${event.data}`, 200);
                 toggleOverlay("hide");
                 updateGameAnnouncements(messages[message.setMessage][0], true, false);
                 document.getElementById('reset-game').style.display = "flex";
                 gameStarted = true;
                 break;
             case "resetReq":
-                log.info(`Reset Game Request Detected: ${event.data}`, 200);
+                logger.info(`Reset Game Request Detected: ${event.data}`, 200);
                 if (message.hasReset) {
-                    log.displayLog("info", "Game has reset. Good Luck!", 200, "--clr-success-a10", "Resetting Game")
+                    logger.displayLog("info", "Game has reset. Good Luck!", 200, "--clr-success-a10", "Resetting Game")
                     toggleOverlay("hide");
                     boardButtons.forEach(button => {
                         button.className = colourClass[2];
@@ -223,18 +223,18 @@ async function wsOpen() {
                 }
                 break;
             case "declineReset":
-                log.info(`Reset game declined by Opponent`, 200, true, "Reset Declined");
+                logger.info(`Reset game declined by Opponent`, 200, true, "Reset Declined");
                 toggleOverlay("hide");
                 break;
             default:
-                log.warn(`Unable to determine WebSocket message type. ${message.type}`, 422);
+                logger.warn(`Unable to determine WebSocket message type. ${message.type}`, 422);
         }
     };
     ws.onerror = function (error) {
-        log.error("WebSocket error:", error);
+        logger.error("WebSocket error:", error);
     };
     ws.onclose = function () {
-        log.warn("WebSocket connection closed. Redirecting to main menu.", 200);
+        logger.warn("WebSocket connection closed. Redirecting to main menu.", 200);
         leaveLobby();
         window.location.href = './';
     }
@@ -242,12 +242,12 @@ async function wsOpen() {
 
 function updateButtonColour(row, column, activePlayer) {
     let button_id = Math.floor((row * 7) + column + 1);
-    log.info(`Move Successful. Button ID {${button_id}} Updated.`)
+    logger.info(`Move Successful. Button ID {${button_id}} Updated.`)
     let button = document.getElementById(button_id);
     if (button) {
         button.className = colourClass[activePlayer];
     } else {
-        log.error(`Invalid Button Id ${button_id}`);
+        logger.error(`Invalid Button Id ${button_id}`);
     }
 }
 
@@ -269,20 +269,20 @@ async function leaveLobby() {
         ws.close(1000, "Client Leaving Lobby");
 
     } catch (error) {
-        log.warn('No WebSocket connection to close.', 400);
+        logger.warn('No WebSocket connection to close.', 400);
     }
     localStorage.clear();
-    log.info("Leaving lobby and clearing session storage.", 200);
+    logger.info("Leaving lobby and clearing session storage.", 200);
     window.location.href = './';
 }
 
 async function startGame() {
-    log.debug("Start Game Button Pressed", 200);
+    logger.debug("Start Game Button Pressed", 200);
     try {
         const usernameInput = document.getElementById("username-input");
         const username = usernameInput.value.trim();
         if (username === "") {
-            log.error("Username cannot be empty.", 422, true, "Empty Username");
+            logger.error("Username cannot be empty.", 422, true, "Empty Username");
             return;
         }
         localStorage.setItem("username", username);
@@ -296,10 +296,10 @@ async function startGame() {
             const errText = await response.text();
             throw new Error(errText);
         }
-        log.info("Game code verified", response.status);
+        logger.info("Game code verified", response.status);
         const data = await response.text();
         const parsedData = JSON.parse(data);
-        log.trace(`startGame() ${data}`, 200);
+        logger.trace(`startGame() ${data}`, 200);
         if (parsedData.startStatus) {
             toggleOverlay("hide");
             updateGameAnnouncements(messages[parsedData.setMessage][0], true, false, colour[parsedData.setMessage]);
@@ -309,7 +309,7 @@ async function startGame() {
             updateGameAnnouncements(messages[2][0], false, true);
         }
     } catch (error) {
-        log.error(error)
+        logger.error(error)
     }
 }
 
@@ -335,7 +335,7 @@ async function resetGame() {
             });
             toggleOverlay("hide");
             updateGameAnnouncements(messages[parsedData.setMessage[0]][0], true, false, colour[parsedData.setMessage[0]]);
-            log.info("Game has reset. Good Luck!", 200, true, "Reset Game");
+            logger.info("Game has reset. Good Luck!", 200, true, "Reset Game");
         } else {
             toggleOverlay("reset");
             document.getElementsByClassName("approval-menu")[0].classList.replace("shown", "hidden");
@@ -343,14 +343,14 @@ async function resetGame() {
         }
 
     } catch (error) {
-        log.error(`resetGame Error: ${error}`, error.status);
+        logger.error(`resetGame Error: ${error}`, error.status);
     }
 }
 
 
 async function joinGameWithUUID() {
     try {
-        log.info(`Joining Game: ${gamecode}, with UUID: ${uuid}`, 200);
+        logger.info(`Joining Game: ${gamecode}, with UUID: ${uuid}`, 200);
         const textJSON = JSON.stringify({ gamecode: gamecode, uuid: uuid });
         const response = await fetch((url + "/joinGame"), {
             method: "POST",
@@ -365,9 +365,9 @@ async function joinGameWithUUID() {
             localStorage.clear();
             throw new Error("Unable to join game. Redirecting to main menu.", 403);
         }
-        log.info(`Successfully joined game ${gamecode}`, 200);
+        logger.info(`Successfully joined game ${gamecode}`, 200);
     } catch (error) {
-        log.error(error.message);
+        logger.error(error.message);
     }
 }
 
@@ -388,12 +388,12 @@ function handleMessages(win, draw, justMoved, colour = `--clr-primary-a20`) {
     if (gamemode === "opvp") {
         let nextMove = (justMoved) ? messages[1][0] : messages[0][0];
         updateGameAnnouncements(nextMove, true, false, colour);
-        log.debug(`Message Update: ${nextMove} with colour ${colour}`, 200);
+        logger.debug(`Message Update: ${nextMove} with colour ${colour}`, 200);
         return;
     } else {
         lpvpMessageToggle = (lpvpMessageToggle === 0) ? 1 : 0;
         updateGameAnnouncements(messages[lpvpMessageToggle][0], true, false, colour);
-        log.debug(`Message Update: ${messages[lpvpMessageToggle][0]} with colour ${colour}`, 200);
+        logger.debug(`Message Update: ${messages[lpvpMessageToggle][0]} with colour ${colour}`, 200);
     }
 }
 
@@ -408,7 +408,7 @@ function toggleOverlay(state) {
     switch (state) {
         case "show":
             overlay.classList.replace("hidden", "shown");
-            log.info("Showing Overlay.", 200);
+            logger.info("Showing Overlay.", 200);
             break;
         case "hide":
             overlay.classList.replace("shown", "hidden");
@@ -416,7 +416,7 @@ function toggleOverlay(state) {
             gameOverMenu.classList.replace("shown", "hidden");
             resetGame.classList.replace("shown", "hidden");
             approvalMenu.classList.replace("shown", "hidden");
-            log.info("Hiding Overlay.", 200);
+            logger.info("Hiding Overlay.", 200);
             break;
         case "draw":
         case "win":
@@ -425,7 +425,7 @@ function toggleOverlay(state) {
             gameOverMenu.classList.replace("hidden", "shown");
             resetGame.classList.replace("shown", "hidden");
             approvalMenu.classList.replace("shown", "hidden");
-            log.info(`Displaying Win Overlay.`, 200);
+            logger.info(`Displaying Win Overlay.`, 200);
             break;
         case "reset":
             overlay.classList.replace("hidden", "shown");
@@ -433,9 +433,9 @@ function toggleOverlay(state) {
             approvalMenu.classList.replace("hidden", "shown");
             startGame.classList.replace("shown", "hidden");
             gameOverMenu.classList.replace("shown", "hidden");
-            log.info("Displaying Reset Confirmation Overlay.", 200);
+            logger.info("Displaying Reset Confirmation Overlay.", 200);
             break;
         default:
-            log.warn(`Invalid overlay state: ${state}`, 422);
+            logger.warn(`Invalid overlay state: ${state}`, 422);
     }
 }

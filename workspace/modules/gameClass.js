@@ -113,45 +113,57 @@ export class game {
     }
 
     async move(uuid, y) {
-        uuid = parseInt(uuid);
-        let player = this.activePlayer;
-        let moveMessage = JSON.stringify({
-            success: false,
-            whoMoved: player,
-            whoNext: player,
-            row: 0,
-            column: y,
-            win: false
-        });
-        if (this.players[player] !== uuid) {
-            logger.info(`Invalid move attempted by player ${uuid} in column {${y}}`, 100);
-            logger.info(`Active player is ${this.players[player]}`, 100);
-            return moveMessage;
-        }
-        if (this.board[y][0] !== null) {
-            logger.info(`Invalid move column {${y}}`, 100);
-            return moveMessage;
-        }
-
-        for (let i = (this.rows - 1); i >= 0; i--) {
-            if (this.board[y][i] === null) {
-                this.board[y][i] = player;
-                await this.set_activePlayer();
-                moveMessage = JSON.stringify({
-                    type: "newMove",
-                    success: true,
-                    whoMoved: player,
-                    whoNext: this.activePlayer,
-                    row: i,
-                    column: y,
-                    win: await this.checkWin(player),
-                    draw: await this.hasDraw()
-                });
+        try {
+            logger.trace(`Player ${uuid} is attempting to move in column ${y}`, 200);
+            uuid = parseInt(uuid);
+            let player = this.activePlayer;
+            let moveMessage = JSON.stringify({
+                success: false,
+                whoMoved: player,
+                whoNext: player,
+                row: 0,
+                column: y,
+                win: false
+            });
+            if (this.players[player] !== uuid) {
+                logger.info(`Invalid move attempted by player ${uuid} in column {${y}}`, 100);
+                logger.info(`Active player is ${this.players[player]}`, 100);
                 return moveMessage;
             }
+            if (this.board[y][0] !== null) {
+                logger.info(`Invalid move column {${y}}`, 100);
+                return moveMessage;
+            }
+            for (let i = (this.rows - 1); i >= 0; i--) {
+                if (this.board[y][i] === null) {
+                    this.board[y][i] = player;
+                    await this.set_activePlayer();
+                    moveMessage = JSON.stringify({
+                        type: "newMove",
+                        success: true,
+                        whoMoved: player,
+                        whoNext: this.activePlayer,
+                        row: i,
+                        column: y,
+                        win: await this.checkWin(player),
+                        draw: await this.hasDraw()
+                    });
+                    return moveMessage;
+                }
+            }
+            logger.info(`No available move in column ${y}`, 100);
+            return moveMessage;
+        } catch (error) {
+            logger.error(`[gameClass.move()] Error processing move for player ${uuid} in column ${y}: ${error.message}`, 500);
+            return JSON.stringify({
+                success: false,
+                whoMoved: -1,
+                whoNext: -1,
+                row: -1,
+                column: -1,
+                win: false
+            });
         }
-        logger.info(`No available move in column ${y}`, 100);
-        return moveMessage;
     }
 
     async readyPlayer(uuid, username) {

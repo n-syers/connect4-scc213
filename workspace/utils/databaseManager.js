@@ -75,15 +75,11 @@ function getMostGamesStarted() {
 
     // Select top 10 players with count of games started and count of wins, ordered by games started.
     // Uses one query to simplify data retrieval and reduce resource load.
+    // Player Name from player1 and player2 column. Count of player names in player1 and player2 column. Count of player names in winner column.
     const query = `
-    SELECT player, COUNT(*) AS player_count, (
-        SELECT COUNT(*) FROM games g2 WHERE g2.winner = player
-    ) AS winner_count
-    FROM (
-        SELECT player1 AS player FROM games
-        UNION ALL
-        SELECT player2 AS player FROM games
-    ) AS combined_players
+    SELECT player,
+    COUNT(*) AS player_count, (SELECT COUNT(*) FROM games g2 WHERE g2.winner = player) AS winner_count
+    FROM (SELECT player1 AS player FROM games UNION ALL SELECT player2 AS player FROM games) AS combined_players
     GROUP BY player
     ORDER BY player_count DESC
     LIMIT ${RECORD_LIMIT};`;

@@ -1,13 +1,14 @@
-import { logger } from './utils/logger.js';
+import * as log from './utils/logger.js';
 
+// Initialise the logger with UI elements
 const loggerElement = document.getElementsByClassName("logger-main-container")[0];
 const loggerIcon = document.getElementById("logger-icon");
 const loggerTitle = document.getElementById("log-title");
 const loggerMessage = document.getElementById("log-message");
-const log = new logger(loggerElement, loggerIcon, loggerTitle, loggerMessage);
+const logger = new log.logger(loggerElement, loggerIcon, loggerTitle, loggerMessage);
 
 const url = window.location.origin;
-log.info(`Connected to Connect4 via ${url}`);
+logger.info(`Connected successfully via ${url}`, 200, "OK");
 
 try {
     const join_game = document.getElementById('join-game-button');
@@ -26,16 +27,16 @@ try {
     join_game.addEventListener('click', async () => {
         try {
             let gamecode = document.getElementById('join-code-input').value;
-            log.info(`Joining Game with Code: ${gamecode}`, 102);
+            logger.info(`Joining game with code: ${gamecode}`, 102, "Processing");
             setlocalStorageItems(gamecode, 'opvp');
             window.location.href = './gameboard';
         } catch (error) {
-            log.error(error.message);
+            logger.error(`[index.joinGameEvent] Error ${error}`, 500, "Internal Server Error");
         }
     });
 
 } catch (error) {
-    log.error(error)
+    logger.error(`[index.js] Error: ${error}`, 0, "UnknownError")
 }
 
 
@@ -45,12 +46,12 @@ function setlocalStorageItems(gamecode, gamemode, uuid = -1) {
         localStorage.setItem('gamemode', gamemode);
         localStorage.setItem('UUID', uuid);
     } catch (error) {
-        log.error(error.message);
+        logger.error(`[index.setLocalStorageItems()] Error: ${error}`, 22, "QuotaExceededError");
     }
 }
 
 async function startGame(gamemode) {
-    log.info(`Starting New ${gamemode.toUpperCase()} Game`, 102);
+    logger.info(`Starting New ${gamemode} Game`, 102);
     try {
         const response = await fetch(url + `/${gamemode}`);
         if (!response.ok) {
@@ -58,10 +59,25 @@ async function startGame(gamemode) {
             throw new Error(JSON.stringify(errData));
         }
         const result = await response.json();
-        log.debug(JSON.stringify(result), result.status);
+        logger.debug(JSON.stringify(result), result.status);
         setlocalStorageItems(result.gameCode, gamemode);
         window.location.href = './gameboard';
     } catch (error) {
-        log.error(error.message);
+        logger.error(`[index.startGame()] Error: ${error}`, 500, "Internal Server Error");
+    }
+}
+
+async function fetchLeaderboard() {
+    logger.info(`Fetching Leaderboard Data`, 102, "Processing");
+    try {
+        const response = await fetch(url + '/leaderboard');
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(JSON.stringify(errData));
+        }
+        const result = await response.json();
+        logger.debug(JSON.stringify(result), result.status);
+    } catch (error) {
+        logger.error(`[index.fetchLeaderboard()] Error: ${error}`, 500, "Internal Server Error");
     }
 }
