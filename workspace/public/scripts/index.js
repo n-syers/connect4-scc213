@@ -17,12 +17,15 @@ try {
     const start_pvain_a = document.getElementById('start_pvain_a');
     const start_pvaim_a = document.getElementById('start_pvaim_a');
     const start_pvaih_a = document.getElementById('start_pvaih_a');
+    const refreshButton = document.getElementById('refresh-button');
 
     start_lpvp_a.addEventListener('click', async () => await startGame('lpvp'));
     start_opvp_a.addEventListener('click', async () => await startGame('opvp'));
     start_pvain_a.addEventListener('click', async () => await startGame('pvain'));
     start_pvaim_a.addEventListener('click', async () => await startGame('pvaim'));
     start_pvaih_a.addEventListener('click', async () => await startGame('pvaih'));
+
+    refreshButton.addEventListener('click', async () => await fetchLeaderboard());
 
     join_game.addEventListener('click', async () => {
         try {
@@ -34,6 +37,8 @@ try {
             logger.error(`[index.joinGameEvent] Error ${error}`, 500, "Internal Server Error");
         }
     });
+
+    fetchLeaderboard();
 
 } catch (error) {
     logger.error(`[index.js] Error: ${error}`, 0, "UnknownError")
@@ -70,13 +75,31 @@ async function startGame(gamemode) {
 async function fetchLeaderboard() {
     logger.info(`Fetching Leaderboard Data`, 102, "Processing");
     try {
-        const response = await fetch(url + '/leaderboard');
+        const textJSON = JSON.stringify({ leaderboardBy: "mostGamesStarted" });
+        const response = await fetch(url + '/leaderboard', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: textJSON
+        });
         if (!response.ok) {
             const errData = await response.json();
             throw new Error(JSON.stringify(errData));
         }
         const result = await response.json();
-        logger.debug(JSON.stringify(result), result.status);
+        logger.table(result, "Leaderboard Table");
+        if (!result) {
+            throw new Error("No data received from server.");
+        }
+        const tr = document.querySelectorAll("#leaderboard-body tr");
+
+        // Set each row to result
+        tr.forEach(row => {
+            const rowId = parseInt(row.id) - 1;
+            row.querySelector(".username").textContent = result[rowId]['player'] || "N/A";
+            row.querySelector(".games-started").textContent = result[rowId]['games_started'] || 0;
+            row.querySelector(".games-won").textContent = result[rowId]['games_won'] || 0;
+
+        });
     } catch (error) {
         logger.error(`[index.fetchLeaderboard()] Error: ${error}`, 500, "Internal Server Error");
     }

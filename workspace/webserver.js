@@ -16,6 +16,7 @@ const server = http.createServer();
 const wss = new WebSocket.Server({ noServer: true });
 
 const socketMapUUID = new Map();
+dbm.open_connection(); // Keep database connection open for duration of server uptime.
 
 wss.on('connection', (ws, req) => {
     logger.info("Client Connected to WebSocket");
@@ -73,26 +74,29 @@ app.get('/gameboard', (req, res) => {
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 // Update leaderboard information
-app.get("/leaderboard", (req, res) => {
+app.post("/leaderboard", async (req, res) => {
     logger.info(`Processing leaderboard request.`, 102);
     const leaderboardBy = req.body.leaderboardBy;
-    dbm.open_connection();
+    let leaderboardData;
     switch (leaderboardBy) {
         case "mostGamesStarted":
-            leaderboardData = dbm.getMostGamesStarted();
+            leaderboardData = await dbm.getMostGamesStarted();
             break;
         case "mostWins":
             logger.warn("Most Wins Not Implemented.", 400);
-            leaderboardData = dbm.getMostWins();
+            leaderboardData = await dbm.getMostWins();
             break;
         default:
             logger.warn(`Invalid leaderboardBy value: ${leaderboardBy}. Defaulting to mostGamesStarted.`, 400);
-            leaderboardData = dbm.getMostGamesStarted();
+            leaderboardData = await dbm.getMostGamesStarted();
     }
-    res.status(200).json({
-        message: "Leaderboard",
-        data: leaderboardData
-    });
+    if (leaderboardData) {
+        logger.debug(`Leaderboard data retrieved successfully.`, 200);
+        res.status(200).json(leaderboardData);
+    } else {
+        logger.error(`Failed to retrieve leaderboard data.`, 500);
+        res.status(500).json({ error: 'Failed to retrieve leaderboard data' });
+    }
 })
 
 // Start new local player vs player game.
@@ -217,9 +221,37 @@ app.post("/move", async (req, res) => {
                     logger.error(`WebSocket for player ${uuid} not found. Unable to send AI move message.`, 500);
                 }
             }
-            // Close lobby if game won. before sending response.
-            if (parsedData.win) {
-                await gameManager.closeLobby(gamecode);
+
+            // Check win/draw conditions and update database if game has concluded
+            let parsedMove = JSON.parse(move_success);
+            let player1 = "Unknown";
+            let player2 = "Unknown";
+            let winner = "Unkown";
+            if (parsedMove.win || parsedMove.draw) {
+                gameManager.closeLobby(gamecode);
+                switch (gamemode) {
+                    case "lpvp":
+                        player1 = temp_game.usernames[0];
+                        dbm.addGame(player1, player1, null); // Cannot win local matches, so winner is set to null.
+                        logger.info(`Game concluded. Recorded result in database.`, 201);
+                        break;
+                    case "opvp":
+                        player1 = temp_game.usernames[0];
+                        player2 = temp_game.usernames[1];
+                        winner = parsedMove.win ? temp_game.usernames[parsedMove.whoMoved] : null;
+                        dbm.addGame(player1, player2, winner);
+                        logger.info(`Game concluded. Recorded result in database.`, 201);
+                        break;
+                    case "pvain":
+                    case "pvaim":
+                    case "pvaih":
+                        player1 = temp_game.usernames[0];
+                        winner = (parsedMove.win && parsedMove.whoMoved == 1) ? temp_game.usernames[0] : null;
+                        dbm.addGame(player1, null, winner);
+                        break;
+                    default:
+                        logger.warn("No Gamemode Passed", 500);
+                }
             }
             res.status(200).send(move);
         } else {
@@ -373,7 +405,8 @@ async function sendWS(firstPlayerUUID, gamecode, message) {
 }
 
 process.on('exit', () => {
-    logger.info('Server shutting down', 200);
+    logger.info('Server shutting down. Closing database connection.', 200);
+    dbm.close_connection();
 });
 
 process.on('uncaughtException', (err) => {

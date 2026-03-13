@@ -13,7 +13,7 @@ let db = null;
 /* Open a database connection if not already open */
 function open_connection() {
     try {
-        if (db !== null) { throw new Error("Database connection already open."); };
+        if (db !== null) { logger.warn("Database connection already open.", 102); };
         db = new sqlite3.Database(dbPath, (err) => {
             if (err) {
                 logger.error(err.message, err.errno);
@@ -66,9 +66,9 @@ function create_table() {
 /*
 Get the top 10 players with the most games started
 Tracked via "player1"
-Returns an array of objects with player's data
+Returns a promise with SQL results
 */
-function getMostGamesStarted() {
+async function getMostGamesStarted(orderby = "games_started") {
     logger.debug('Retrieving 10 players with most games started.', 102);
 
     const RECORD_LIMIT = 10; // Limit for number of records to retrieve
@@ -78,21 +78,20 @@ function getMostGamesStarted() {
     // Player Name from player1 and player2 column. Count of player names in player1 and player2 column. Count of player names in winner column.
     const query = `
     SELECT player,
-    COUNT(*) AS player_count, (SELECT COUNT(*) FROM games g2 WHERE g2.winner = player) AS winner_count
+    COUNT(*) AS games_started, (SELECT COUNT(*) FROM games g2 WHERE g2.winner = player) AS games_won
     FROM (SELECT player1 AS player FROM games UNION ALL SELECT player2 AS player FROM games) AS combined_players
     GROUP BY player
-    ORDER BY player_count DESC
+    ORDER BY ${orderby} DESC
     LIMIT ${RECORD_LIMIT};`;
 
-    db.serialize(() => {
-        db.all(query, (err, data) => {
-            if (err) {
-                logger.error(err.message, err.errno);
-            }
-            logger.table(data);
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.all(query, (err, data) => {
+                if (err) reject(err);
+                resolve(data);
+            });
         });
     });
-
 }
 
 // Add a new game record to the datebase.

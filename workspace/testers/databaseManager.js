@@ -1,4 +1,5 @@
 const dbm = require('../utils/databaseManager.js');
+const logger = require('../utils/logger.js');
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -6,15 +7,19 @@ function sleep(ms) {
 
 /* Main function to test database operations */
 
-function main() {
+async function main() {
     dbm.open_connection();
     dbm.create_table();
     dbm.insertFalseData();
-    dbm.getMostGamesStarted();
+    logger.table(await dbm.getMostGamesStarted());
     dbm.addGame("Test", "Test2", "Test");
     dbm.addGame("Test", "Test4", "Test");
-    dbm.getMostGamesStarted();
-
+    logger.table(await dbm.getMostGamesStarted());
+    dbm.close_connection();
 }
 
-main();
+try {
+    main();
+} catch (error) {
+    console.error(`Error in testing databaseManager.js: ${error}`)
+}

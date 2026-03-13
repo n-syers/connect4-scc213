@@ -1,5 +1,23 @@
 @import url('variables.css');
 
+#refresh-button {
+    color: var(--clr-light-a0);
+    padding-left: 12rem;
+    font-size: 32px;
+    position: absolute;
+    bottom: 0;
+    cursor: pointer;
+}
+
+.leaderboard-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
 .create-game-container nav {
     display: flex;
     flex-direction: row;
