@@ -267,4 +267,8 @@ export class game {
     async getActivePlayer() {
         return this.activePlayer;
     }
+
+    async resetConditionals() {
+        this.playerConditionCheck = Array(2).fill(false);
+    }
 }

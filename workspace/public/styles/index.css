@@ -68,6 +68,7 @@
     position: relative;
     display: inline-block;
     width: 15rem;
+    z-index: 10;
 }
 
 .join-game-selector:hover .input-container {
@@ -81,26 +82,30 @@
 }
 
 .leaderboard-container {
+    width: 60%;
+    min-width: 350px;
+    max-width: 700px;
     display: flex;
     flex-direction: column;
-    width: 800px;
 }
 
 .leaderboard-container table {
-    border: 2px solid var(--clr-warning-a0);
-    padding: 1rem;
+    border: 2px solid var(--clr-warning-a10);
+    justify-content: center;
+    padding: 0.5rem;
 }
+
 
 thead tr {
     color: var(--clr-primary-a30);
 }
 
 tbody tr {
-    border-bottom: 1px solid var(--clr-surface-a20);
     color: var(--clr-light-a0);
+    text-align: center;
 }
 
-@media (min-width: 1100px) {
+@container (min-width: 1100px) {
     #start-game {
         display: none;
     }
@@ -132,10 +137,11 @@ tbody tr {
     }
 }
 
-@media (max-width: 1099px) {
+@container (max-width: 1099px) {
     .new-game-selector {
         position: relative;
         display: inline-block;
+        z-index: 10;
     }
 
 

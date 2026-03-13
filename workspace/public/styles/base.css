@@ -20,13 +20,15 @@ p {
 h1 {
     font-size: 40px;
     color: var(--clr-primary-a0);
+    margin-top: 1rem;
     margin-bottom: 1rem;
 }
 
 h2 {
     font-size: 30px;
     color: var(--clr-primary-a20);
-    margin-bottom: 0;
+    margin-top: 1rem;
+    margin-bottom: 0.2rem;
 }
 
 button {
@@ -54,22 +56,19 @@ thead {
 }
 
 tbody {
-    font-size: 12px;
+    font-size: 16px;
 }
 
 .container {
     background-color: var(--clr-surface-a10);
+    container-type: inline-size;
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 24px;
-    padding-top: 0;
-    margin: 1rem;
     border-radius: 15px;
-    width: fit-content;
-    min-width: 350px;
-    max-width: 100%;
-    min-height: 650px;
-    max-height: 100%;
+    width: 60%;
+    min-width: 370px;
+    max-width: 1100px;
     z-index: 1;
+    padding: 0.5rem;
 }

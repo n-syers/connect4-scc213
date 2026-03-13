@@ -95,7 +95,8 @@ try {
 async function verifycode() {
     gamecode = localStorage.getItem("gamecode");
     if (gamecode === null) {
-        logger.error("No game code detected. Redirecting to main menu.", 102, true, "No Game Code Detected");
+        logger.error("No game code detected. Redirecting to main menu.", 102);
+        logger.displayLog("error", "No game code detected. Redirecting to main menu.", "--clr-danger-a10", "No Game Code Detected");
         window.location.href = './';
         return;
     }
@@ -138,7 +139,8 @@ async function declineReset() {
 async function move(id) {
     logger.info(`Button with ID ${id} pressed.`);
     if (hasWon || !gameStarted) {
-        logger.info("Game inactive.", 200);
+        logger.warn("Game inactive.", 200);
+        logger.displayLog("warning", "Game is not active. Please start a new game.", "--clr-primary-a20", "Game Inactive");
         return;
     }
     const y = Math.floor((id - 1) % 7); // Column
@@ -161,6 +163,7 @@ async function move(id) {
             handleMessages(parsedData.win, parsedData.draw, true, colour[parsedData.whoNext]);
         } else {
             logger.warn("Move Attempted Unsuccessful", 100, true, "Invalid Move")
+            logger.displayLog("warning", "Invalid Move. Please Try Again.", "--clr-warning-a10", "Invalid Move")
         };
     } catch (error) {
         logger.error(error, error.status)
@@ -199,6 +202,7 @@ async function wsOpen() {
                 break;
             case "startGame":
                 logger.info(`Start Game Detected: ${event.data}`, 200);
+                logger.displayLog("info", "Game Has Started! Good Luck!", "--clr-success-a10", "Game Started")
                 toggleOverlay("hide");
                 updateGameAnnouncements(messages[message.setMessage][0], true, false);
                 document.getElementById('reset-game').style.display = "flex";
@@ -207,7 +211,7 @@ async function wsOpen() {
             case "resetReq":
                 logger.info(`Reset Game Request Detected: ${event.data}`, 200);
                 if (message.hasReset) {
-                    logger.displayLog("info", "Game has reset. Good Luck!", 200, "--clr-success-a10", "Resetting Game")
+                    logger.displayLog("info", "Game has reset. Good Luck!", "--clr-success-a10", "Resetting Game")
                     toggleOverlay("hide");
                     boardButtons.forEach(button => {
                         button.className = colourClass[2];
@@ -223,7 +227,7 @@ async function wsOpen() {
                 }
                 break;
             case "declineReset":
-                logger.info(`Reset game declined by Opponent`, 200, true, "Reset Declined");
+                logger.info("info", "Reset game declined by Opponent", "--clr-danger-a10", "Reset Declined");
                 toggleOverlay("hide");
                 break;
             default:
@@ -335,7 +339,8 @@ async function resetGame() {
             });
             toggleOverlay("hide");
             updateGameAnnouncements(messages[parsedData.setMessage[0]][0], true, false, colour[parsedData.setMessage[0]]);
-            logger.info("Game has reset. Good Luck!", 200, true, "Reset Game");
+            logger.info("Game has reset", 200);
+            logger.displayLog("info", "Game has reset. Good Luck!", "--clr-success-a10", "Resetting Game")
         } else {
             toggleOverlay("reset");
             document.getElementsByClassName("approval-menu")[0].classList.replace("shown", "hidden");

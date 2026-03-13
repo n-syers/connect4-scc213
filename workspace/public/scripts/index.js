@@ -25,7 +25,7 @@ try {
     start_pvaim_a.addEventListener('click', async () => await startGame('pvaim'));
     start_pvaih_a.addEventListener('click', async () => await startGame('pvaih'));
 
-    refreshButton.addEventListener('click', async () => await fetchLeaderboard());
+    refreshButton.addEventListener('click', async () => await fetchLeaderboard(true));
 
     join_game.addEventListener('click', async () => {
         try {
@@ -38,7 +38,7 @@ try {
         }
     });
 
-    fetchLeaderboard();
+    fetchLeaderboard(false);
 
 } catch (error) {
     logger.error(`[index.js] Error: ${error}`, 0, "UnknownError")
@@ -72,7 +72,7 @@ async function startGame(gamemode) {
     }
 }
 
-async function fetchLeaderboard() {
+async function fetchLeaderboard(display) {
     logger.info(`Fetching Leaderboard Data`, 102, "Processing");
     try {
         const textJSON = JSON.stringify({ leaderboardBy: "mostGamesStarted" });
@@ -86,7 +86,6 @@ async function fetchLeaderboard() {
             throw new Error(JSON.stringify(errData));
         }
         const result = await response.json();
-        logger.table(result, "Leaderboard Table");
         if (!result) {
             throw new Error("No data received from server.");
         }
@@ -100,6 +99,10 @@ async function fetchLeaderboard() {
             row.querySelector(".games-won").textContent = result[rowId]['games_won'] || 0;
 
         });
+
+        if (display) {
+            logger.displayLog("info", "Leaderboard Reloaded Successfully", "--clr-success-a10", "Reload");
+        }
     } catch (error) {
         logger.error(`[index.fetchLeaderboard()] Error: ${error}`, 500, "Internal Server Error");
     }

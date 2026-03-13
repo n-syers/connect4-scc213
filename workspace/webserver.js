@@ -221,38 +221,6 @@ app.post("/move", async (req, res) => {
                     logger.error(`WebSocket for player ${uuid} not found. Unable to send AI move message.`, 500);
                 }
             }
-
-            // Check win/draw conditions and update database if game has concluded
-            let parsedMove = JSON.parse(move_success);
-            let player1 = "Unknown";
-            let player2 = "Unknown";
-            let winner = "Unkown";
-            if (parsedMove.win || parsedMove.draw) {
-                gameManager.closeLobby(gamecode);
-                switch (gamemode) {
-                    case "lpvp":
-                        player1 = temp_game.usernames[0];
-                        dbm.addGame(player1, player1, null); // Cannot win local matches, so winner is set to null.
-                        logger.info(`Game concluded. Recorded result in database.`, 201);
-                        break;
-                    case "opvp":
-                        player1 = temp_game.usernames[0];
-                        player2 = temp_game.usernames[1];
-                        winner = parsedMove.win ? temp_game.usernames[parsedMove.whoMoved] : null;
-                        dbm.addGame(player1, player2, winner);
-                        logger.info(`Game concluded. Recorded result in database.`, 201);
-                        break;
-                    case "pvain":
-                    case "pvaim":
-                    case "pvaih":
-                        player1 = temp_game.usernames[0];
-                        winner = (parsedMove.win && parsedMove.whoMoved == 1) ? temp_game.usernames[0] : null;
-                        dbm.addGame(player1, null, winner);
-                        break;
-                    default:
-                        logger.warn("No Gamemode Passed", 500);
-                }
-            }
             res.status(200).send(move);
         } else {
             throw new Error(`Move failed for gamecode: ${gamecode}`);
@@ -340,13 +308,14 @@ app.post("/restartGame", async (req, res) => {
             setMessage: messageNum
         };
         if (parsedData.canReset) {
-            wsMessage.setMessage = [(uuid === players[0]) ? 1 : 0, 0];
+            wsMessage.setMessage = [(uuid === players[0]) ? 0 : 1, 0];
+            messageNum = [(uuid === players[0]) ? 0 : 1, 0]; // "P1 Turn" or "P2 Turn"
         } else {
             wsMessage.setMessage = [2, 2]; // "Opp wants reset"
         }
         sendWS(uuid, gamecode, wsMessage);
     } else {
-        messageNum = [0, 0]; // "P1 Turn"
+        messageNum = [0, 0];
     }
 
     res.status(200).json({
@@ -362,6 +331,7 @@ app.post("/declineReset", async (req, res) => {
     logger.debug(`Reset decline requested by ${uuid}`, 102);
 
     const gamemode = await gameManager.getGamemode(gamecode);
+    await gameManager.resetConditionals(gamecode);
 
     if (gamemode === "opvp") {
         const wsMessage = {

@@ -148,12 +148,8 @@ export class logger {
 
     // Displays a log message as a UI element
     // Hides after 5 seconds or when clicked
-    displayLog(type, message, colour, title = "Missing Title") {
-
-        // Get the CSS variable colour value for the log type
+    displayLog(type, message, colour, title = "No Title Set") {
         const mappedColour = getComputedStyle(document.documentElement).getPropertyValue(colour) || '#ffffff';
-
-        // Set element values and styles
         this.icon.textContent = iconMap[type] || "circle";
         this.icon.style.color = mappedColour;
         this.title.textContent = title;
@@ -161,7 +157,6 @@ export class logger {
         this.message.textContent = message;
         this.logger.style.display = "flex";
 
-        // Enable hide timer
         this.timer = setTimeout(() => {
             this.logger.style.display = "none";
         }, 5000);
