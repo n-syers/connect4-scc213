@@ -53,7 +53,6 @@ async function move(gamecode, y, uuid) {
     let player2 = "Unknown";
     let winner = "Unkown";
     if (parsedMove.win || parsedMove.draw) {
-        closeLobby(gamecode);
         switch (gamemode) {
             case "lpvp":
                 player1 = temp_game.usernames[0];

@@ -204,22 +204,27 @@ app.post("/move", async (req, res) => {
     try {
         let move = await gameManager.move(gamecode, y, uuid);
         parsedData = JSON.parse(move);
-        if (move !== null) {
+        if (move) {
             logger.trace(move, 200);
-            if (gamemode === "opvp") {
+            if (gamemode === "opvp" && parsedData.success) {
                 sendWS(uuid, gamecode, parsedData);
-            } else if (gamemode !== "lpvp" && gamemode !== "opvp") {
+            } else if (gamemode !== "lpvp" && parsedData.success && !parsedData.win && !parsedData.draw) {
                 logger.debug(`Processing AI Move for game ${gamecode}`, 102);
-                const aiMove = await gameManager.moveAi(gamecode, gamemode);
                 const ws = getWebSocketByUUID(uuid);
-                logger.debug(`Gamecode: ${gamecode} AI Move: ${aiMove}`);
-                logger.debug(`Sending AI move to player ${uuid}`);
                 if (ws) {
-                    ws.send(aiMove);
+                    setTimeout(async () => {
+                        let aiMove = await gameManager.moveAi(gamecode, gamemode);
+                        logger.debug(`Gamecode: ${gamecode} AI Move: ${aiMove}`);
+                        logger.debug(`Sending AI move to player ${uuid}`);
+                        ws.send(aiMove);
+                    }, 1000); // Delay AI move by 1 seconds
                     logger.info(`Ai player move message sent to ${uuid}`);
                 } else {
                     logger.error(`WebSocket for player ${uuid} not found. Unable to send AI move message.`, 500);
                 }
+            }
+            if (parsedData.win || parsedData.draw) {
+                gameManager.closeLobby(gamecode);
             }
             res.status(200).send(move);
         } else {
