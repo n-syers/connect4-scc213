@@ -315,7 +315,8 @@ async function testAiWinConditions(board, player, temp_game) {
                 // Has winning move been found
                 if (hasWon) {
                     logger.debug(`Winning move located for player ${player} at Column ${col} (Row ${row})`, 102);
-                    let rowBelow = row + 1;
+
+                    let rowBelow = row + 1; // Check the row below is not empty (2+ moves ahead win condition)
 
                     // If the token below the winning move is empty, loop again.
                     if (board[col][rowBelow] === null) {
@@ -323,42 +324,57 @@ async function testAiWinConditions(board, player, temp_game) {
                         break;
                     };
 
+                    // Reset the board state
                     board[col][row] = null;
-                    let aiMove = await temp_game.move(-1, col);
+                    let aiMove = await temp_game.move(-1, col); // Process the move for the AI and return move
                     return aiMove;
+
+                    // If no winning move is found reset the board state
                 } else {
                     board[col][row] = null;
                 }
             }
         }
     }
+    // No winning move found, return null
     return null;
 }
 
+// Handle game reset requests for a given gamecode and player UUID
+// Returns boolean
 async function addResetRequest(gamecode, uuid) {
-    const temp_game = gameMap.get(gamecode);
-    let status = await temp_game.addResetRequest(uuid);
+    const temp_game = gameMap.get(gamecode); // get game instance
+    let status = await temp_game.addResetRequest(uuid); // Add reset request for player UUID
     return status;
 }
 
+// Close a game instance by removing it from the game map
 async function closeLobby(gamecode) {
     try {
-        gameMap.delete(parseInt(gamecode));
+        gameMap.delete(parseInt(gamecode)); // Delete the game instance from the map
+        logger.info(`Lobby closed and game instance removed for gamecode: ${gamecode}`, 201);
+        // Catch any errors and log them
     } catch (error) {
         logger.error(`Error closing lobby for gamecode: ${gamecode} | Error: ${error.message}`, 500);
     }
 }
 
+// Reset any conditional variables for a given gamecode
 async function resetConditionals(gamecode) {
-    const temp_game = gameMap.get(gamecode);
-    await temp_game.resetConditionals();
+
+    const temp_game = gameMap.get(gamecode); // Get game instance
+
+    await temp_game.resetConditionals(); // Reset conditional variables
 }
 
+// Handle uncaught exceptions to prevent server crashes
 process.on('uncaughtException', (err) => {
     logger.error(`Uncaught Exception: ${err.message} | Stack: ${err.stack}`, 500);
     process.exit(1);
 });
 
+
+// Export functions for use in other modules
 export default {
     createGame,
     verifyGameCode,
