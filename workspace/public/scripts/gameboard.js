@@ -1,8 +1,10 @@
 import * as log from './utils/logger.js';
 
-const url = window.location.origin;
-const colour = ["red", "yellow", "--clr-primary-a20"];
-const colourClass = ["button-red", "button-yellow", "button-white"];
+const url = window.location.origin; // Get base URL for API requests
+const colour = ["red", "yellow", "--clr-primary-a20"]; // colours for CSS styling announcements
+const colourClass = ["button-red", "button-yellow", "button-white"]; // Classes for styling
+
+// Game state variables
 let gamecode = null;
 let gamemode = null;
 let uuid = -1;
@@ -10,6 +12,7 @@ let hasWon = false;
 let gameStarted = false;
 let ws;
 
+// Dictionary of all gamemode codes to titles
 const titles = {
     "lpvp": "Local Player vs Player",
     "opvp": "Online Player vs Player",
@@ -25,22 +28,27 @@ let messages = [
     ["Waiting For Opponent", "Draw!"]
 ];
 
+// HTML elements for logger display
 const loggerElement = document.getElementsByClassName("logger-main-container")[0];
 const loggerIcon = document.getElementById("logger-icon");
 const loggerTitle = document.getElementById("log-title");
 const loggerMessage = document.getElementById("log-message");
 
+// Initialise a logger instance
+const logger = new log.logger(loggerElement, loggerIcon, loggerTitle, loggerMessage);
+
+// All board buttons (42 total)
 const boardButtons = document.querySelectorAll('.board button');
 
+// Action buttons for overlay menu
 const acceptButton = document.getElementById('accept');
 const declineButton = document.getElementById('decline');
 
 
-const logger = new log.logger(loggerElement, loggerIcon, loggerTitle, loggerMessage);
 
 try {
     verifycode();
-    document.getElementById("gamecode-announcement").textContent = `Game Code: ${gamecode}`;
+    document.getElementById("gamecode-announcement").textContent = `${gamecode}`;
     gamemode = localStorage.getItem("gamemode");
     document.getElementById("gamemode-title").textContent = titles[gamemode];
     switch (gamemode) {
@@ -74,18 +82,45 @@ try {
 
     const controlButton = document.getElementById('game-control');
     controlButton.addEventListener('click', (event) => startGame());
+    document.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter' && gameStarted === false) {
+            startGame();
+        }
+    });
 
     const resetGameButton = document.getElementById('reset-game');
     resetGameButton.addEventListener('click', (event) => resetGame());
+    document.addEventListener('keypress', (event) => {
+        if (event.key.toUpperCase() === 'R' && gameStarted === true) {
+            resetGame();
+        }
+    });
 
     const backButton = document.getElementById('main-menu-control');
     backButton.addEventListener('click', (event) => leaveLobby());
+    document.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter' && hasWon === true) {
+            leaveLobby();
+        }
+    });
 
     window.addEventListener('beforeunload', (event) => leaveLobby());
 
     // Add an event listener to each button on the board.
     boardButtons.forEach(button => {
         button.addEventListener('click', (event) => move(event.target.id));
+
+        // Add keyboard support for gameboard columns (keys 1-7)
+        // Only active when game is started and no winner is detected
+        if (parseInt(button.id) <= 7) {
+            logger.debug(`Adding keypress event listener to button with ID ${button.id}`, 200, "OK");
+            document.addEventListener('keypress', (event) => {
+                if (event.key === button.id && gameStarted && !hasWon) {
+                    logger.debug(`Keypress event detected for button with ID ${button.id}`, 200, "OK");
+                    move(button.id);
+                }
+            });
+        }
     });
 } catch (error) {
     logger.error(error)
@@ -446,6 +481,7 @@ function toggleOverlay(state) {
             approvalMenu.classList.replace("hidden", "shown");
             startGame.classList.replace("shown", "hidden");
             gameOverMenu.classList.replace("shown", "hidden");
+            resetGame.disabled = false;
             logger.info("Displaying Reset Confirmation Overlay.", 200, "OK");
             break;
         default:

@@ -32,36 +32,36 @@
         <p>Connect 4 is a game where two players take turns placing a disc into one of seven columns. The goal of
             the game is to connect four discs in a horizontal, vertical, or diagonal line. The first player to get
             four in a row wins the game.</p>
-        <div class="create-game-container">
+        <div class="play-game-container">
             <h2>Select A Mode To Play</h2>
-            <nav>
+            <nav role="navigation">
                 <div class="new-game-selector">
-                    <button class="primary-button" id="start-game">Select Gamemode</button>
+                    <button class="primary-button" id="start-game" tabindex="0">Select Gamemode</button>
                     <div class="gamemodes">
-                        <a id="start_lpvp_a">
+                        <a id="start_lpvp_a" tabindex="0">
                             <span class="material-symbols-outlined">group</span>
-                            <span>Player vs Player</span>
+                            <span>Local Player vs Player</span>
                         </a>
-                        <a id="start_opvp_a">
+                        <a id="start_opvp_a" tabindex="0">
                             <span class="material-symbols-outlined">public</span>
                             <span>Online Player vs Player</span>
                         </a>
-                        <a id="start_pvain_a">
+                        <a id="start_pvain_a" tabindex="0">
                             <span class="material-symbols-outlined">smart_toy</span>
                             <span>Player vs Naive AI</span>
                         </a>
-                        <a id="start_pvaim_a">
+                        <a id="start_pvaim_a" tabindex="0">
                             <span class="material-symbols-outlined">memory</span>
                             <span>Player vs Medium AI</span>
                         </a>
-                        <a id="start_pvaih_a">
+                        <a id="start_pvaih_a" tabindex="0">
                             <span class="material-symbols-outlined">psychology</span>
                             <span>Player vs Hard AI</span>
                         </a>
                     </div>
                 </div>
                 <div class="join-game-selector">
-                    <button>Join Online Game</button>
+                    <button class="primary-button" id="join-menu-button" tabindex="0">Join Online Game</button>
                     <div class="input-container">
                         <input type="text" id="join-code-input" placeholder="Enter game code: ######">
                         <button id="join-game-button">JOIN</button>
@@ -72,10 +72,10 @@
         <div class="leaderboard-container">
             <div class="leaderboard-header">
                 <h2>Leaderboard</h2>
-                <span class="material-symbols-outlined" id="refresh-button">refresh</span>
+                <span class="material-symbols-outlined" id="refresh-button" tabindex="0">refresh</span>
             </div>
             <table>
-                <thead id="leaderboard-headers">
+                <thead id=" leaderboard-headers">
                     <th>Rank</th>
                     <th>Username</th>
                     <th>Games Started</th>

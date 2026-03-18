@@ -1,42 +1,11 @@
-const statusMap = {
-    // TRACE CODES
-    100: "Continue", // Client can continue with request
-    101: "Switching protocols", // Switching to different protocol
-    102: "Processing", // Received request and processing
-    // INFO CODES
-    200: "OK", // success
-    201: "Created", // resource created
-    202: "Accepted", // track asynchronous tasks
-    204: "No content", // Track actions that don't return data
-    // DEBUG CODES
-    301: "Moved permanently", // File moved permenantly
-    304: "Not modified", // No change to the resource
-    307: "Temporary redirect", // redirect
-    308: "Permanent redirect", // redirec
-    // WARN CODES
-    400: "Bad request", // Can't understand request
-    401: "Unauthorized", // Missing API key, credentials, or token
-    403: "Forbidden", // Access Not Allowed
-    404: "Not found", // Resource Not Found
-    405: "Method not allowed", // Cannot access method
-    408: "Request timeout", // Request Timed out
-    413: "Payload too large", // Request too large for server
-    422: "Unprocessable Entity", // Violation of rules
-    426: "Upgrade required", // Upgrade to websocket required
-    428: "Too many requests", // Client sending too many requests
-    // ERROR CODES
-    500: "Internal server error", // Generic Server Side Error
-    501: "Not implemented", // Functionality not implemented
-    502: "Bad gateway", // Failure in communication between servers.
-    503: "Service unavailable", // Unable to handle requests due to overload or maintenance.
-    504: "Gateway timeout", // Timeout
-    505: "HTTP version not supported", // Unsupported version
-    507: "Insufficient storage", // Lack of storage or resources.
-    508: "Loop detected", // Infinate Loop Detected
-};
 
+// Imports for the logger utility
+const http = require('http');
+
+// Transform a status code into status text
+// Returns a string
 function getStatusCodeTitle(status) {
-    return statusMap[status] || "Unknown Status";
+    return http.STATUS_CODES[status] || 'Unknown Status';
 }
 
 // ANSI Styles

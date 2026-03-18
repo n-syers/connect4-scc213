@@ -2,29 +2,25 @@
 
 #refresh-button {
     color: var(--clr-light-a0);
-    padding-left: 12rem;
     font-size: 32px;
-    position: absolute;
-    bottom: 0;
     cursor: pointer;
+    align-self: self-end;
+    padding-bottom: 0.25rem;
 }
 
 .leaderboard-header {
     display: flex;
     flex-direction: row;
-    align-items: center;
     justify-content: left;
-    position: relative;
-    margin-bottom: 1rem;
+    align-content: center;
 }
 
-.create-game-container nav {
+.play-game-container nav {
     display: flex;
     flex-direction: row;
     gap: 0.5rem;
     margin-top: 0.25rem;
     margin-bottom: 1rem;
-    width: 100%;
 }
 
 .create-game-container button {
@@ -50,6 +46,7 @@
     color: var(--clr-success-a0);
     border-top: 2px solid var(--clr-success-a0);
     right: 0;
+    width: 100%;
     border: none;
     justify-content: center;
     background-color: transparent;
@@ -61,6 +58,7 @@
     background-color: var(--clr-surface-a10);
     border: 2px solid var(--clr-success-a0);
     border-radius: 5px;
+    width: 90%;
 }
 
 
@@ -71,12 +69,21 @@
     z-index: 10;
 }
 
+.join-game-selector:focus-within .input-container {
+    display: block;
+}
+
 .join-game-selector:hover .input-container {
     display: block;
 }
 
-.join-game-selector:hover #join-game {
-    border-top: 2px solid var(--clr-success-a10);
+.join-game-selector #join-menu-button {
+    background: transparent !important;
+    border: 2px solid var(--clr-success-a0) !important;
+    color: var(--clr-success-a0) !important;
+}
+
+.join-game-selector #join-game-button:hover {
     color: var(--clr-success-a20);
     border-radius: 0;
 }
@@ -139,11 +146,19 @@ tbody tr {
 
 @container (max-width: 1099px) {
     .new-game-selector {
+        font-weight: bold;
+        height: 2rem;
+        border-radius: 5px;
         position: relative;
         display: inline-block;
         z-index: 10;
     }
 
+    .new-game-selector button {
+        background: transparent !important;
+        border: 2px solid var(--clr-success-a0) !important;
+        color: var(--clr-success-a0) !important;
+    }
 
     .gamemodes {
         display: none;
@@ -172,6 +187,10 @@ tbody tr {
     }
 
     .new-game-selector:hover .gamemodes {
+        display: block;
+    }
+
+    .new-game-selector:focus-within .gamemodes {
         display: block;
     }
 

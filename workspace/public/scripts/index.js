@@ -20,12 +20,42 @@ try {
     const refreshButton = document.getElementById('refresh-button');
 
     start_lpvp_a.addEventListener('click', async () => await startGame('lpvp'));
+    start_lpvp_a.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+            await startGame('lpvp');
+        }
+    });
     start_opvp_a.addEventListener('click', async () => await startGame('opvp'));
+    start_opvp_a.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+            await startGame('opvp');
+        }
+    });
     start_pvain_a.addEventListener('click', async () => await startGame('pvain'));
+    start_pvain_a.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+            await startGame('pvain');
+        }
+    });
     start_pvaim_a.addEventListener('click', async () => await startGame('pvaim'));
+    start_pvaim_a.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+            await startGame('pvaim');
+        }
+    });
     start_pvaih_a.addEventListener('click', async () => await startGame('pvaih'));
+    start_pvaih_a.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+            await startGame('pvaih');
+        }
+    });
 
     refreshButton.addEventListener('click', async () => await fetchLeaderboard(true));
+    refreshButton.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+            await fetchLeaderboard(true);
+        }
+    });
 
     join_game.addEventListener('click', async () => {
         try {
@@ -37,6 +67,12 @@ try {
             logger.error(`[index.joinGameEvent] Error ${error}`, 500, "Internal Server Error");
         }
     });
+    join_game.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter') {
+            await join_game.click();
+        }
+    });
+
 
     fetchLeaderboard(false);
 
