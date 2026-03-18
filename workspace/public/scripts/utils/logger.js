@@ -70,7 +70,7 @@ export class logger {
             `color: ${colourMap.warn};`,
             `color: ${colourMap.error};`
         );
-        displayLog("error", message, '--clr-danger-a10', statusTitle);
+        this.displayLog("error", message, '--clr-danger-a10', statusTitle);
     }
 
     // Used to log warns in the console
