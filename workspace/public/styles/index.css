@@ -8,6 +8,10 @@
     padding-bottom: 0.25rem;
 }
 
+#theme-selector {
+    width: 20%;
+}
+
 .leaderboard-header {
     display: flex;
     flex-direction: row;

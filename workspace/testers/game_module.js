@@ -1,7 +1,7 @@
-const logger = require("../logger.js");
+const logger = require("../utils/logger.js");
 
 try {
-    const game_module = require("../gameClass.js");
+    const game_module = require("../modules/gameClass.js");
 
     let game = new game_module.game("lpvp", 123456);
 

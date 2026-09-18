@@ -1,8 +1,8 @@
 import * as log from './utils/logger.js';
 
 const url = window.location.origin; // Get base URL for API requests
-const colour = ["red", "yellow", "--clr-primary-a20"]; // colours for CSS styling announcements
-const colourClass = ["button-red", "button-yellow", "button-white"]; // Classes for styling
+let colour = ["Red", "Yellow", "--clr-primary-a20"]; // colours for CSS styling announcements
+let colourClass = ["button-red", "button-yellow", "button-white"]; // Classes for styling
 
 // Game state variables
 let gamecode = null;
@@ -56,12 +56,33 @@ try {
     gamemode = localStorage.getItem("gamemode");
     document.getElementById("gamemode-title").textContent = titles[gamemode];
 
+    // Change colours based on theme stored in sessionStorage
+    const storedTheme = sessionStorage.getItem('theme');
+    switch (storedTheme) {
+        case "0":
+            colour = ["Red", "Yellow", "--clr-primary-a20"];
+            colourClass = ["button-red", "button-yellow", "button-white"];
+            break;
+        case "1":
+            colour = ["Red", "Blue", "--clr-primary-a20"];
+            colourClass = ["button-red", "button-blue", "button-white"];
+            break;
+        case "2":
+            colour = ["Purple", "Orange", "--clr-primary-a20"];
+            colourClass = ["button-purple", "button-orange", "button-white"];
+            break;
+        default:
+            logger.warn(`Invalid theme value in localStorage: ${storedTheme}. Reverting to default theme.`, 422);
+            break;
+
+    }
+
     // Set messages based on gamemode
     switch (gamemode) {
         case "lpvp":
             messages = [
-                ["Red's Turn", "Red Wins!"],
-                ["Yellow's Turn", "Yellow Wins!"],
+                [`${colour[0]}'s Turn`, `${colour[0]} Wins!`],
+                [`${colour[1]}'s Turn`, `${colour[1]} Wins!`],
                 ["Waiting For Opponent", "Draw!"]
             ];
             break;
@@ -93,7 +114,7 @@ try {
     startButton.addEventListener('click', (event) => startGame());
     document.addEventListener('keypress', (event) => {
         if (event.key === 'Enter' && gameStarted === false) {
-            startGame();
+            startButton.click();
         }
     });
 
@@ -102,7 +123,7 @@ try {
     resetGameButton.addEventListener('click', (event) => resetGame());
     document.addEventListener('keypress', (event) => {
         if (event.key.toUpperCase() === 'R' && gameStarted === true) {
-            resetGame();
+            resetGameButton.click();
         }
     });
 
@@ -283,8 +304,9 @@ async function wsOpen() {
         ws.close();
     }
 
-    // Open new WebSocket connection
-    ws = new WebSocket(`ws://127.0.0.1:3030`);
+    // Connect to the same host as the page, including when playing across devices
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${wsProtocol}//${window.location.hostname}:3030`);
 
     // Log WebSocket connection status
     ws.onopen = function () {
@@ -464,7 +486,7 @@ async function startGame() {
 
         // Ensure username is not empty
         if (username === "") {
-            logger.error("Username cannot be empty.", 422, true, "Empty Username");
+            logger.error("Username cannot be empty.", 422, "Empty Username");
             return;
         }
 

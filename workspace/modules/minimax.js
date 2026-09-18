@@ -189,8 +189,8 @@ export class minimax {
 
     // Performs the minimax algorithm to a given depth
     // Recursive function to depth = 0 or terminal state
-    // Uses 100 for absolute wins/losses. (Positive for maximiser, Negative for minimiser)
-    // Returns the best score and move for the maximiser
+    // Weight terminal scores by remaining depth to prefer earlier wins and later losses.
+    // Returns the best score for the maximiser
     minimaxSearch(state, depth, isMaximising) {
 
         // Check for terminal node or depth 0
@@ -201,9 +201,9 @@ export class minimax {
             if (isTerminal.terminate) {
                 switch (isTerminal.terminateBy) {
                     case "maximiser":
-                        return 100000 * depth; // Garunteed win
+                        return 100000 * (depth + 1); // Keep wins positive even at depth 0
                     case "minimiser":
-                        return -100000 * depth; // Garunteed loss
+                        return -100000 * (depth + 1); // Keep losses negative even at depth 0
                     case "draw":
                         return 0; // Neutral score for draw
                     default: // Handle unknown terminal state
@@ -216,7 +216,7 @@ export class minimax {
             return this.scoreState(state, isMaximising);
 
         }
-        let value = isMaximising ? -100000 : 100000; // Switch value based on isMaximising
+        let value = isMaximising ? -Infinity : Infinity; // Allow the full range of depth-weighted scores
 
         let validMoves = this.getValidMoves(state); // Get all valid moves for the current state
 
@@ -241,7 +241,7 @@ export class minimax {
     // Returns the best move (column index)
     getBestMove() {
 
-        let bestScore = -100000; // Default any move as best
+        let bestScore = -Infinity; // Choose a legal move even when every option loses
         let bestMove = null;
 
         let validMoves = this.getValidMoves(this.stateZero); // Get all valid moves for the current state

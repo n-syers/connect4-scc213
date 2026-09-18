@@ -19,6 +19,14 @@ try {
     const start_pvaim_a = document.getElementById('start_pvaim_a');
     const start_pvaih_a = document.getElementById('start_pvaih_a');
     const refreshButton = document.getElementById('refresh-button');
+    const themeChanger = document.getElementById('theme-selector');
+
+    // Add event listener for theme changer (change)
+    themeChanger.addEventListener('change', (event) => {
+        const selectedTheme = event.target.value;
+        sessionStorage.setItem('theme', selectedTheme);
+        logger.displayLog("info", `Theme changed to ${selectedTheme}`, "--clr-success-a10", "Theme Change");
+    });
 
     // Add event listeners for game mode buttons (click and keypress for accessibility)
     start_lpvp_a.addEventListener('click', async () => await startGame('lpvp'));

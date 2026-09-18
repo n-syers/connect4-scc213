@@ -2,10 +2,10 @@
   "name": "scc-213-web",
   "version": "1.0.0",
   "description": "SCC 213",
-  "main": "index.js",
+  "main": "workspace/webserver.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js"
+    "start": "node workspace/webserver.js",
+    "dev": "node workspace/webserver.js"
   },
   "keywords": [],
   "author": "",

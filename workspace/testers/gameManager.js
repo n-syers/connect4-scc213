@@ -1,5 +1,5 @@
 import logger from '../utils/logger.js';
-import { createGame } from '../gameManager.js';
+import { createGame } from '../utils/gameManager.js';
 
 
 try {
